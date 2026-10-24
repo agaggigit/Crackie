@@ -35,6 +35,7 @@ export function konfigurasiAgent(): KonfigurasiAgent {
     temperature: Number(process.env.LLM_TEMPERATURE ?? "0.1"),
     systemPrompt: SYSTEM_PROMPT,
     tools: TOOL,
+    versi: process.env.AGENT_VERSI?.trim() || "1",
   };
 }
 

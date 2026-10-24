@@ -18,6 +18,9 @@ export type KonfigurasiAgent = {
   temperature: number;
   systemPrompt: string;
   tools: unknown;
+  // Penanda versi tanpa efek ke perilaku agent, supaya nyalakanLagi bisa memakai sidik jari baru
+  // tanpa mengubah prompt atau model (docs/prd/be.md 3.6).
+  versi: string;
 };
 
 export function hitungSidikJari(k: KonfigurasiAgent): Hex {

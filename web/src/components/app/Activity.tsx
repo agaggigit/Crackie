@@ -50,7 +50,7 @@ export function Activity({ className = "" }: { className?: string }) {
             <li key={i} className="h-11 animate-pulse rounded-2xl bg-field" />
           ))}
         </ul>
-      ) : state === "error" ? (
+      ) : state === "error" && list.length === 0 ? (
         <p className="py-4 text-sm text-ink-2">We could not load the history from Monad. New activity will still show up here.</p>
       ) : list.length === 0 ? (
         <p className="py-4 text-sm text-ink-2">Nothing yet. Be the first to try.</p>

@@ -91,7 +91,7 @@ export function OwnerPanel() {
   return (
     <>
       <OwnerHero stopped={stopped} isDemo={isDemo} isOwner={isOwner} pemilik={pemilik} />
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1fr_400px]">
+      <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_1fr_400px]">
         <div className="flex flex-col gap-3">
           <MainFunds amount={status?.danaUtama} locked={locked} onDone={refetch} />
           <Bounty
@@ -108,7 +108,7 @@ export function OwnerPanel() {
           <Suppliers locked={locked} />
           <AdminTools />
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 md:col-span-2 md:grid md:grid-cols-2 xl:col-span-1 xl:flex">
           <Setup stopped={stopped} locked={locked} onDone={refetch} />
           <Reputation locked={locked} />
         </div>
@@ -121,8 +121,8 @@ function OwnerHero({ stopped, isDemo, isOwner, pemilik }: { stopped: boolean; is
   return (
     <section className="relative mt-2 min-h-[220px] overflow-hidden rounded-[32px] bg-navy p-6 text-white sm:p-8 lg:rounded-[36px]">
       <Melt variant="glow" className="opacity-90" />
-      <Jebi mood={stopped ? "stopped" : "safe"} size={300} className="absolute -bottom-16 -right-6 w-[46%] max-w-[300px] sm:right-10" />
-      <div className="relative flex max-w-[640px] flex-col gap-3">
+      <Jebi mood={stopped ? "stopped" : "safe"} size={300} className="absolute -bottom-16 -right-10 w-[38%] max-w-[300px] opacity-90 sm:right-10 sm:w-[30%] sm:opacity-100" />
+      <div className="relative flex max-w-[72%] flex-col gap-3 sm:max-w-[640px]">
         <div className="flex flex-wrap gap-2">
           <Chip tone={stopped ? "warn" : "ok"}>{stopped ? "Stopped" : "Active"}</Chip>
           {isDemo ? <DemoBadge /> : isOwner ? <Chip tone="glass">You are the owner</Chip> : <Chip tone="glass">Read only</Chip>}

@@ -1,8 +1,8 @@
-# Desain FE Jebol
+# Desain FE Crackie
 
 Hasil M1 (`docs/prd/fe.md` Bagian 8).
 
-- **File desain:** `docs/desain/jebol.pen`, dibuka di pen.dev. Gambar PNG/WEBP di folder yang sama dipakai oleh frame v1 (arsip).
+- **File desain:** `docs/desain/crackie.pen`, dibuka di pen.dev. Gambar PNG/WEBP di folder yang sama dipakai oleh frame v1 (arsip).
 - **Aset maskot untuk kode:** `web/public/maskot/*.svg`, diekspor dari frame "03 Export assets".
 
 ## 1. Arah visual
@@ -10,7 +10,7 @@ Hasil M1 (`docs/prd/fe.md` Bagian 8).
 - **Satu tone gradien (oranye) dipadukan dengan satu warna solid (navy).** Komposisi gradien berbeda di tiap kartu.
 - Gradien dibuat dengan cara "bentuk lalu blur": bentuk solid digambar dulu, lalu diberi blur 50 sampai 140 sampai melebur. Lihat frame "00 Gradient lab".
 - **Maskot Jebi** (celengan 2D, flat, tanpa outline) dipasang besar, sengaja terpotong tepi kartu, lalu di-*mask* dengan gradien supaya melebur ke warna kartu.
-- KopiBot (cangkir kopi 2D) adalah avatar agent contoh, bukan maskot Jebol.
+- KopiBot (cangkir kopi 2D) adalah avatar agent contoh, bukan maskot Crackie.
 
 ## 2. Token
 | Token | Nilai | Dipakai untuk |

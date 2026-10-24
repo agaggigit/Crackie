@@ -11,7 +11,7 @@ const ALT: Record<JebiMood, string> = {
   gift: "Jebi holding out a coin",
 };
 
-// Maskot dari web/public/maskot (diekspor dari docs/desain/jebol.pen).
+// Maskot dari web/public/maskot (diekspor dari docs/desain/crackie.pen).
 export function Jebi({
   mood,
   size,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useChainModal } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
@@ -9,6 +10,7 @@ import { formatMon } from "@/utils/format";
 export function ClaimCard() {
   const { address, chainId } = useAccount();
   const wrongChain = chainId !== monadTestnet.id;
+  const { openChainModal } = useChainModal();
   const pending = useReadContract({
     address: VAULT_ADDRESS,
     abi: vaultAbi,
@@ -27,11 +29,21 @@ export function ClaimCard() {
       <div className="min-w-0 flex-1">
         <div className="text-[15px] font-semibold">{formatMon(amount)} MON is waiting for you</div>
         <p className="text-[13px] text-white/65">
-          {write.isError ? "That did not go through. Nothing was charged. Try again." : "We could not send your bounty automatically. Claim it with one tap."}
+          {wrongChain
+            ? "Switch your wallet to Monad testnet to claim it."
+            : write.isError
+              ? "That did not go through. Nothing was charged. Try again."
+              : "We could not send your bounty automatically. Claim it with one tap."}
         </p>
       </div>
+      {wrongChain ? (
+        <button type="button" onClick={openChainModal} className="h-10 rounded-full bg-white px-5 text-sm font-semibold text-navy">
+          Switch network
+        </button>
+      ) : null}
       <button
         type="button"
+        hidden={wrongChain}
         disabled={working || wrongChain}
         onClick={() => write.writeContract({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "klaimHadiah", chainId: monadTestnet.id })}
         className="h-10 rounded-full bg-orange px-5 text-sm font-semibold hover:bg-ember disabled:opacity-60"

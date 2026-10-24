@@ -6,23 +6,31 @@ import { VAULT_READY } from "@/config/vault";
 export type Anggaran = { terpakai: number; batas: number; sisa: number; resetPada: string };
 export type Kesehatan = { ok: boolean; cocok?: boolean; error?: string };
 
+// status 0 = server tidak bisa dihubungi (jaringan putus atau body bukan JSON).
 async function getJson<T>(url: string): Promise<{ status: number; body: T | null }> {
-  const res = await fetch(url, { cache: "no-store" });
-  const body = (await res.json().catch(() => null)) as T | null;
-  return { status: res.status, body };
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    const body = (await res.json().catch(() => null)) as T | null;
+    return { status: body === null ? 0 : res.status, body };
+  } catch {
+    return { status: 0, body: null };
+  }
 }
+
+// Saat ada yang gagal, cek lebih sering supaya komposer cepat terbuka lagi begitu BE pulih.
+const interval = (q: { state: { data?: { status: number } } }) => (q.state.data?.status === 200 ? 15_000 : 5_000);
 
 // Dicek sebelum penyerang membayar gas: anggaran harian BE dan kesehatan agent (docs/prd/be.md Bagian 4).
 export function usePreflight() {
   const anggaran = useQuery({
     queryKey: ["anggaran"],
     queryFn: () => getJson<Anggaran>("/api/anggaran"),
-    refetchInterval: 15_000,
+    refetchInterval: interval,
   });
   const kesehatan = useQuery({
     queryKey: ["kesehatan"],
     queryFn: () => getJson<Kesehatan>("/api/kesehatan"),
-    refetchInterval: 15_000,
+    refetchInterval: interval,
     enabled: VAULT_READY,
   });
 

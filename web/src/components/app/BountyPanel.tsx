@@ -6,7 +6,7 @@ import { Jebi, KopiBotAvatar, type JebiMood } from "@/components/ui/Jebi";
 import { Melt } from "@/components/ui/Melt";
 import { useNow } from "@/hooks/useNow";
 import type { VaultStatus } from "@/hooks/useVaultStatus";
-import { formatDuration, formatScore } from "@/utils/format";
+import { formatHeld, formatScore } from "@/utils/format";
 
 function lockLabel(status: VaultStatus, now: number): string {
   const left = Number(status.kunciSampai) - now;
@@ -28,7 +28,7 @@ export function BountyPanel({
   maxPerWin: string;
 }) {
   const now = useNow();
-  const held = status?.aktif ? formatDuration(now - Number(status.bertahanSejak)) : "0s";
+  const held = formatHeld(status?.aktif, status?.bertahanSejak, now);
 
   return (
     <section aria-label="KopiBot bounty" className="flex flex-col gap-3">

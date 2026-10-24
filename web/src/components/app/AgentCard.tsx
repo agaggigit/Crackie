@@ -8,13 +8,13 @@ import { Jebi, KopiBotAvatar } from "@/components/ui/Jebi";
 import { Melt } from "@/components/ui/Melt";
 import { useNow } from "@/hooks/useNow";
 import { useVaultStatus } from "@/hooks/useVaultStatus";
-import { formatDuration, formatScore } from "@/utils/format";
+import { formatHeld, formatScore } from "@/utils/format";
 
 // Kartu KopiBot di daftar agent (desain A1).
 export function KopiBotCard() {
   const { status, isDemo, isLoading } = useVaultStatus();
   const now = useNow();
-  const held = status?.aktif ? formatDuration(now - Number(status.bertahanSejak)) : "0s";
+  const held = formatHeld(status?.aktif, status?.bertahanSejak, now);
 
   return (
     <article className="relative flex min-h-[520px] flex-col overflow-hidden rounded-[36px] bg-navy text-white">

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sidik-jari": "tsx --env-file-if-exists=.env.local scripts/sidik-jari.ts",
+    "uji:model": "tsx --env-file-if-exists=.env.local scripts/uji-model.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.104",

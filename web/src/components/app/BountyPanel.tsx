@@ -66,7 +66,7 @@ export function BountyPanel({
           </div>
           {status ? (
             <div className="flex max-w-[62%] flex-wrap gap-2 md:max-w-none">
-              <Chip tone="glass">Up to {maxPerWin} per win</Chip>
+              <Chip tone="glass">Up to {maxPerWin} MON per win</Chip>
               <Chip tone="glass">{lockLabel(status, now)}</Chip>
             </div>
           ) : null}

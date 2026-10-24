@@ -343,6 +343,7 @@ event SidikJariDiganti(bytes32 sidikJari);
 POST /api/serang           { txHash, pesan } → { ke, penyerang, balasan, aksi }
 GET  /api/anggaran         → { terpakai, batas, sisa, resetPada }
 GET  /api/kesehatan        → { ok, alamatAgent, saldoGasAgent, sidikJariLokal, sidikJariOnChain, cocok }
+POST /api/faucet           { alamat } → { txHash, jumlah } (faucet mini penonton, 1× per alamat)
 POST /api/admin/tagihan    (token admin) pembayaran normal untuk demo, bukan percobaan
 GET  /api/admin/percobaan  (token admin) detail serangan untuk developer:
                            [{ ke, penyerang, saluran, pesan, status, balasan, aksi, waktu }]

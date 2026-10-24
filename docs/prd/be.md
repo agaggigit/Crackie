@@ -162,6 +162,11 @@ UPSTASH_REDIS_REST_TOKEN=
 # Hanya lokal, selama CrackieVault belum tersambung: 1 = tool bayar palsu tanpa chain
 # dan tanpa verifikasi hash (respons ditandai `palsu: true`). Diabaikan di Vercel (env `VERCEL` ada).
 BAYAR_PALSU=
+# Faucet (fe.md 3.8): wallet terpisah dari wallet agent, isi MON testnet secukupnya
+FAUCET_PRIVATE_KEY=
+FAUCET_JUMLAH=0.05
+FAUCET_BATAS_HARIAN=20
+
 # Hanya lokal (anvil): alamat CrackieVaultTiruan. Diisi otomatis oleh npm run dev:anvil.
 CRACKIE_VAULT_ALAMAT=
 ```
@@ -177,6 +182,7 @@ Alamat vault diambil dari `web/src/abi/CrackieVault.ts` (milik SC), bukan dari e
 | `GET /api/kesehatan` | FE, tim | – | `{ ok, alamatAgent, saldoGasAgent, sidikJariLokal, sidikJariOnChain, cocok }` | Untuk debugging dan demo. `ok` = chain terbaca dan sidik jari cocok. Kalau gagal, ada field `error`: 500 kalau konfigurasi agent salah (mis. `AGENT_PRIVATE_KEY` kosong), 503 kalau chain tidak bisa diakses. Hasil di-cache 5 detik |
 | `POST /api/admin/tagihan` | Pemilik (demo) | `{ teks }` + header `Authorization: Bearer <ADMIN_TOKEN>` | `{ balasan, aksi }` | Tidak dihitung sebagai percobaan |
 | `GET /api/admin/percobaan` | Pemilik | header token admin, `?batas=` (1–200, default 50) | daftar `{ ke, penyerang, saluran, pesan, status, balasan, aksi, waktu }`, terbaru dulu | Detail serangan untuk developer. `saluran`: `"publik"` (percobaan) atau `"pemilik"` (tagihan admin; `ke` dan `penyerang` null). `status`: `"diproses"` (belum ada `balasan`/`aksi`) atau `"selesai"` |
+| `POST /api/faucet` | FE (modal "Get test MON") | `{ alamat }` | `{ txHash, jumlah }` | Faucet mini `fe.md` 3.8, dari wallet faucet (terpisah dari wallet agent). 400 alamat tidak valid, 409 `alasan: "sudah_pernah"` atau `"saldo_cukup"` (saldo ≥ `FAUCET_JUMLAH`), 429 `"batas_harian"` (`FAUCET_BATAS_HARIAN`, default 20, reset 00.00 WIB), 501 `"belum_siap"` (tanpa `FAUCET_PRIVATE_KEY`), 503 gagal/sibuk. Kalau pengiriman gagal, penanda alamat dan hitungan harian dikembalikan |
 
 ### 4.2 Format hash pesan (harus sama di FE dan BE)
 `hashPesan = keccak256(toBytes(pesan))` (viem), dengan `pesan` persis seperti yang dikirim ke BE: UTF-8, tanpa trim atau normalisasi. FE tidak boleh mengubah teks setelah hash dihitung.

@@ -24,7 +24,7 @@ export const vaultAbi = parseAbi([
   "function hadiahTertunda(address) view returns (uint256)",
   "event PercobaanTercatat(address indexed penyerang, bytes32 hashPesan, uint256 ke)",
   "event Dibayar(address indexed ke, uint256 jumlah)",
-  "event Jebol(address indexed penemu, uint256 hadiah, bytes32 sidikJari)",
+  "event Crackie(address indexed penemu, uint256 hadiah, bytes32 sidikJari)",
   "event WewenangDicabut()",
   "event DinyalakanLagi(bytes32 sidikJari)",
   "event SidikJariDiganti(bytes32 sidikJari)",

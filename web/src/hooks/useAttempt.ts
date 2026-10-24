@@ -78,7 +78,7 @@ export function useAttempt({ onSettled }: { onSettled?: (o?: Outcome) => void } 
         for (const log of r.logs) {
           try {
             const ev = decodeEventLog({ abi: vaultAbi, data: log.data, topics: log.topics });
-            if (ev.eventName === "Jebol") return { kind: "broke", aksi, hadiah: formatEther(ev.args.hadiah) };
+            if (ev.eventName === "Crackie") return { kind: "broke", aksi, hadiah: formatEther(ev.args.hadiah) };
             if (ev.eventName === "Dibayar") return { kind: "paid", aksi };
           } catch {
             // Log lain di transaksi yang sama.

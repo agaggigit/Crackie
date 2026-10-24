@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/app/AppNav";
-import { LandingBounty, LandingKopiBot } from "@/components/landing/LiveBits";
+import { YourAgentCard } from "@/components/app/AgentCard";
+import { HeroTag, LandingBounty, LandingKopiBot } from "@/components/landing/LiveBits";
 import { ArrowButton } from "@/components/ui/Button";
 import { Jebi, type JebiMood } from "@/components/ui/Jebi";
 import { Melt, type MeltVariant } from "@/components/ui/Melt";
@@ -68,7 +69,7 @@ export default function Landing() {
 
       <section className="grid gap-3 lg:h-[720px] lg:grid-cols-[1fr_560px]">
         <div className="flex flex-col justify-between gap-10 rounded-[36px] bg-navy p-7 text-white sm:p-12 lg:rounded-[44px] lg:p-14">
-          <span className="w-fit rounded-[8px] bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-peach">Live on Monad testnet</span>
+          <HeroTag />
           <div className="flex flex-col gap-6">
             <h1 className="font-head text-[44px] font-semibold leading-[1.02] tracking-[-0.045em] sm:text-[60px] xl:text-[70px]">
               Can your AI agent be talked into paying the wrong person?
@@ -129,17 +130,7 @@ export default function Landing() {
         <SectionHead title="Agents" sub="The longer an agent holds out, the higher its score." />
         <div className="grid gap-3 lg:grid-cols-[1fr_440px]">
           <LandingKopiBot />
-          <article className="relative flex min-h-[420px] flex-col overflow-hidden rounded-[36px] bg-white p-8">
-            <h3 className="font-head text-[30px] font-semibold tracking-[-0.035em]">Your agent here</h3>
-            <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-ink-2">Add Jebol to an agent that holds money. Jebi will guard its bounty.</p>
-            <a
-              href="#builders"
-              className="mt-5 inline-flex h-10 w-fit items-center rounded-full border-[1.5px] border-navy px-4 text-sm font-semibold hover:bg-navy hover:text-white"
-            >
-              Protect my agent
-            </a>
-            <Jebi mood="gift" size={420} className="absolute -bottom-10 -right-10 w-[78%] max-w-[420px]" />
-          </article>
+          <YourAgentCard />
         </div>
       </section>
 

@@ -3,6 +3,7 @@
 import { KopiBotCard } from "@/components/app/AgentCard";
 import { Amount } from "@/components/ui/Amount";
 import { DemoBadge } from "@/components/ui/Chip";
+import { VAULT_READY } from "@/config/vault";
 import { useNow } from "@/hooks/useNow";
 import { useVaultStatus } from "@/hooks/useVaultStatus";
 import { formatDuration } from "@/utils/format";
@@ -27,4 +28,13 @@ export function LandingBounty() {
 
 export function LandingKopiBot() {
   return <KopiBotCard />;
+}
+
+// Label hero: "Live" hanya kalau kontrak sudah ada di Monad, selain itu jujur bahwa ini data demo.
+export function HeroTag() {
+  return (
+    <span className="w-fit rounded-[8px] bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-peach">
+      {VAULT_READY ? "Live on Monad testnet" : "Demo data until the vault is on Monad"}
+    </span>
+  );
 }

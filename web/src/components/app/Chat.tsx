@@ -37,10 +37,14 @@ function useBlocker(onGetMon?: () => void): Blocker | null {
       </button>
     );
 
+  // Urutan: server mati dulu (anggaran dan setup tidak bisa diketahui), lalu chain, anggaran, setup.
+  if (pre.serverDown)
+    return { mood: "think", title: "KopiBot is offline", body: "Our server is not answering right now. Tries are paused so you do not waste a fee." };
+  if (pre.chainDown)
+    return { mood: "think", title: "Monad is not answering", body: "We cannot read Monad right now. Tries are paused so you do not waste a fee." };
   if (pre.budgetOut) return { mood: "stopped", title: "KopiBot is resting", body: "Today's tries are used up. New tries open at midnight WIB." };
-  if (pre.agentOffline)
+  if (pre.setupMismatch)
     return { mood: "stopped", title: "KopiBot is not ready", body: "Its setup does not match what is recorded on Monad. Tries are paused so you do not waste a fee." };
-  if (pre.backendDown) return { mood: "think", title: "KopiBot is offline", body: "Our server is not answering right now. Try again in a moment." };
   if (!VAULT_READY) return null;
   if (!isConnected)
     return { mood: "idle", title: "Connect a wallet to try", body: "You need a wallet on Monad testnet. Each try costs a small network fee.", action: btn("Connect wallet", openConnectModal) };

@@ -31,22 +31,27 @@ export function usePreflight() {
     queryKey: ["kesehatan"],
     queryFn: () => getJson<Kesehatan>("/api/kesehatan"),
     refetchInterval: interval,
+    // Mode demo tidak punya kontrak, jadi kesehatan chain tidak dicek.
     enabled: VAULT_READY,
   });
 
   const a = anggaran.data;
-  const k = kesehatan.data;
+  const k = VAULT_READY ? kesehatan.data : undefined;
+
+  // Kode dari GET /api/kesehatan: 200 = chain terbaca, 503 = chain tidak bisa diakses, 500 = konfigurasi agent salah.
+  // Selain itu (404, jaringan putus, body bukan JSON) berarti server BE tidak menjawab.
+  const serverDown = (a !== undefined && a.status !== 200) || (k !== undefined && k.status !== 200 && k.status !== 503);
+  const chainDown = !serverDown && k?.status === 503;
   const budgetOut = a?.status === 200 && a.body ? a.body.sisa <= 0 : false;
-  // Mode demo tidak punya kontrak, jadi kesehatan chain tidak dicek.
-  const agentOffline = VAULT_READY && k !== undefined && !(k.status === 200 && k.body?.ok);
-  const backendDown = a !== undefined && a.status !== 200;
+  const setupMismatch = k?.status === 200 && k.body?.cocok === false;
 
   return {
     loading: anggaran.isLoading || (VAULT_READY && kesehatan.isLoading),
+    serverDown,
+    chainDown,
     budgetOut,
+    setupMismatch,
     resetPada: a?.body?.resetPada,
-    agentOffline,
-    backendDown,
     refetch: () => Promise.all([anggaran.refetch(), kesehatan.refetch()]),
   };
 }

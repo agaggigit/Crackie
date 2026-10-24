@@ -1,12 +1,12 @@
 "use client";
 
 import { Ban, Coffee, ExternalLink, Loader2 } from "lucide-react";
+import { parseEther } from "viem";
 import type { ReactNode } from "react";
 import { Jebi, type JebiMood } from "@/components/ui/Jebi";
 import { Melt } from "@/components/ui/Melt";
-import type { AttemptError, Outcome, Step, Turn } from "@/hooks/useAttempt";
-import { SUPPLIERS } from "@/config/vault";
-import { shortAddress, txUrl } from "@/utils/format";
+import { RESENDABLE, type AttemptError, type Outcome, type Step, type Turn } from "@/hooks/useAttempt";
+import { formatMon, shortAddress, supplierName, txUrl } from "@/utils/format";
 
 const STEPS: { key: Step[]; label: string }[] = [
   { key: ["locked"], label: "Locked" },
@@ -82,8 +82,6 @@ export function Thinking({ step }: { step: Step }) {
   );
 }
 
-const supplierName = (a: string) => SUPPLIERS.find((s) => s.address.toLowerCase() === a.toLowerCase())?.name;
-
 function Receipt({ hash, light = false }: { hash: string; light?: boolean }) {
   return (
     <a
@@ -115,7 +113,7 @@ export function OutcomeCard({ outcome, demo }: { outcome: Outcome; demo?: boolea
     const name = supplierName(outcome.aksi.alamat);
     return (
       <Row icon={<Coffee size={18} aria-hidden />} iconTone="bg-white text-orange" tone="bg-cream" title="Paid an approved supplier">
-        {outcome.aksi.jumlah} MON to {name ?? shortAddress(outcome.aksi.alamat)}. That is allowed, so no bounty.
+        {formatMon(parseEther(outcome.aksi.jumlah))} MON to {name ?? shortAddress(outcome.aksi.alamat)}. That is allowed, so no bounty.
         {demo ? null : <Receipt hash={outcome.aksi.txHash} />}
       </Row>
     );
@@ -155,15 +153,25 @@ const ERRORS: Record<AttemptError, { mood: JebiMood; title: string; body: string
     title: "Your try was not recorded",
     body: "Monad did not accept it, so KopiBot never saw it. Each wallet can send up to 10 tries per hour.",
   },
+  receipt_unknown: {
+    mood: "think",
+    title: "Waiting for Monad",
+    body: "Your try was sent but is not confirmed yet. Once it lands, send it to KopiBot. You will not pay again.",
+  },
   budget: { mood: "stopped", title: "KopiBot is resting", body: "Today's tries are used up. New tries open at midnight WIB. Your try is still recorded on Monad." },
+  busy: { mood: "think", title: "KopiBot is busy", body: "Other tries are being read. Send yours again in a moment. You will not pay again." },
   offline: {
     mood: "stopped",
     title: "KopiBot could not read your try",
-    body: "Monad or our server did not respond, or the agent setup does not match Monad. Your try is still recorded.",
+    body: "Monad or our server did not respond. Your try is still recorded, so you can send it again without paying.",
   },
   duplicate: { mood: "think", title: "This try was already read", body: "Each recorded try is read once. Write a new message to try again." },
-  bad_request: { mood: "think", title: "We could not match your try", body: "The message did not match what was recorded on Monad. Write it again and resend." },
-  network: { mood: "think", title: "Connection lost", body: "We could not reach KopiBot. Try again in a moment." },
+  not_found: {
+    mood: "think",
+    title: "KopiBot could not find your try yet",
+    body: "Monad may still be catching up. Send it again in a moment. You will not pay again.",
+  },
+  network: { mood: "think", title: "Connection lost", body: "We could not reach KopiBot. Your try is still recorded, so you can send it again." },
   pending_unknown: {
     mood: "think",
     title: "Waiting for Monad",
@@ -171,16 +179,27 @@ const ERRORS: Record<AttemptError, { mood: JebiMood; title: string; body: string
   },
 };
 
-export function ErrorCard({ turn }: { turn: Turn }) {
+export function ErrorCard({ turn, onResend, disabled }: { turn: Turn; onResend?: () => void; disabled?: boolean }) {
   const e = ERRORS[turn.error!];
+  const canResend = !!onResend && !!turn.recordTx && RESENDABLE.includes(turn.error!);
   return (
-    <div role="alert" className="anim-pop flex items-center gap-3 rounded-[24px] bg-field px-4 py-3">
+    <div role="alert" className="anim-pop flex flex-wrap items-center gap-3 rounded-[24px] bg-field px-4 py-3">
       <Jebi mood={e.mood} size={56} className="shrink-0" />
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 basis-48">
         <div className="text-[15px] font-semibold">{e.title}</div>
         <p className="text-[13px] leading-relaxed text-ink-2">{e.body}</p>
       </div>
       {turn.error === "pending_unknown" && turn.aksi ? <Receipt hash={turn.aksi.txHash} /> : null}
+      {canResend ? (
+        <button
+          type="button"
+          onClick={onResend}
+          disabled={disabled}
+          className="h-9 shrink-0 rounded-full bg-navy px-4 text-sm font-semibold text-white disabled:opacity-40"
+        >
+          Send to KopiBot again
+        </button>
+      ) : null}
     </div>
   );
 }

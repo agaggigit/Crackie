@@ -18,14 +18,14 @@ export type Hasil = { status: number; body: Record<string, unknown> };
 const hasil = (status: number, body: Record<string, unknown>): Hasil => ({ status, body });
 
 // ⚠️ MODE PALSU: tool bayar tanpa chain dan tanpa verifikasi hash, hanya untuk lokal selama
-// JebolVault belum tersambung. Selalu mati di Vercel, dan respons ditandai `palsu: true`.
+// CrackieVault belum tersambung. Selalu mati di Vercel, dan respons ditandai `palsu: true`.
 export const modePalsu = () => process.env.BAYAR_PALSU === "1" && !process.env.VERCEL;
 
 const bayarPalsu: Eksekutor = async (ke, jumlahWei): Promise<HasilBayar> => {
   const diAllowlist = SUPPLIER.some((s) => getAddress(s.alamat) === ke);
   if (diAllowlist) return { txHash: null, hasil: "dibayar" };
   const hadiah = jumlahWei < parseEther("0.05") ? jumlahWei : parseEther("0.05");
-  return { txHash: null, hasil: "jebol", hadiah: formatEther(hadiah) };
+  return { txHash: null, hasil: "crackie", hadiah: formatEther(hadiah) };
 };
 
 function galatKe(e: unknown): Hasil {

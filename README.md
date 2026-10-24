@@ -1,4 +1,4 @@
-# Jebol
+# Crackie
 
 Alarm untuk AI agent yang memegang uang. Dibuat di Monad Blitz Jogja Vol. 2.
 

@@ -3,7 +3,7 @@
 // Env proses menimpa .env.local, jadi RPC testnet di .env.local tetap utuh.
 import { spawn } from "node:child_process";
 
-const vault = process.argv[2] ?? process.env.JEBOL_VAULT_ALAMAT;
+const vault = process.argv[2] ?? process.env.CRACKIE_VAULT_ALAMAT;
 if (!vault) {
   console.error("Pakai: npm run dev:anvil -- <alamatVaultDiAnvil>");
   process.exit(1);
@@ -14,7 +14,7 @@ const env = {
   NEXT_PUBLIC_RPC_URL: "http://127.0.0.1:8545",
   NEXT_PUBLIC_CHAIN_ID: "31337",
   RPC_URL_CADANGAN: "http://127.0.0.1:8545",
-  JEBOL_VAULT_ALAMAT: vault,
+  CRACKIE_VAULT_ALAMAT: vault,
   BAYAR_PALSU: "0",
 };
 console.log(`next dev → anvil, vault ${vault}`);

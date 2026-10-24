@@ -16,7 +16,7 @@ import {
   type Hex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { JEBOL_VAULT_ADDRESS, jebolVaultAbi } from "@/abi/JebolVault";
+import { CRACKIE_VAULT_ADDRESS, crackieVaultAbi } from "@/abi/CrackieVault";
 import type { HasilBayar } from "./agent";
 
 export class GalatKonfigurasi extends Error {}
@@ -47,11 +47,11 @@ const buatKlienPublik = () => createPublicClient({ chain: chain(), transport: tr
 let _publik: ReturnType<typeof buatKlienPublik> | undefined;
 export const klienPublik = () => (_publik ??= buatKlienPublik());
 
-// JEBOL_VAULT_ALAMAT hanya untuk kontrak tiruan di anvil, diabaikan di Vercel.
+// CRACKIE_VAULT_ALAMAT hanya untuk kontrak tiruan di anvil, diabaikan di Vercel.
 export function alamatVault(): Address {
-  const a = (lokal() && process.env.JEBOL_VAULT_ALAMAT) || JEBOL_VAULT_ADDRESS;
+  const a = (lokal() && process.env.CRACKIE_VAULT_ALAMAT) || CRACKIE_VAULT_ADDRESS;
   if (!isAddress(a, { strict: false }) || isAddressEqual(a, zeroAddress)) {
-    throw new GalatKonfigurasi("vault belum di-deploy (alamat di web/src/abi/JebolVault.ts masih nol)");
+    throw new GalatKonfigurasi("vault belum di-deploy (alamat di web/src/abi/CrackieVault.ts masih nol)");
   }
   return getAddress(a.toLowerCase());
 }
@@ -82,7 +82,7 @@ export async function verifikasiBukti(txHash: Hex, pesan: string): Promise<{ pen
 
   // Cari log yang hash-nya cocok dari alamat vault, bukan log pertama.
   const hash = keccak256(toBytes(pesan)).toLowerCase();
-  const log = parseEventLogs({ abi: jebolVaultAbi, eventName: "PercobaanTercatat", logs: receipt.logs }).find(
+  const log = parseEventLogs({ abi: crackieVaultAbi, eventName: "PercobaanTercatat", logs: receipt.logs }).find(
     (l) => isAddressEqual(l.address, vault) && l.args.hashPesan.toLowerCase() === hash,
   );
   if (!log) throw new BuktiTidakValid("tidak ada PercobaanTercatat dari vault untuk hash pesan ini");
@@ -90,7 +90,7 @@ export async function verifikasiBukti(txHash: Hex, pesan: string): Promise<{ pen
 }
 
 export async function bacaStatus(): Promise<{ aktif: boolean; sidikJari: Hex }> {
-  const s = await klienPublik().readContract({ address: alamatVault(), abi: jebolVaultAbi, functionName: "status" });
+  const s = await klienPublik().readContract({ address: alamatVault(), abi: crackieVaultAbi, functionName: "status" });
   return { aktif: s[0], sidikJari: s[8] };
 }
 
@@ -110,7 +110,7 @@ export async function kirimBayar(ke: Address, jumlahWei: bigint): Promise<HasilB
   const nonce = await publik.getTransactionCount({ address: akun.address, blockTag: "pending" });
   const txHash = await dompet.writeContract({
     address: vault,
-    abi: jebolVaultAbi,
+    abi: crackieVaultAbi,
     functionName: "bayar",
     args: [ke, jumlahWei],
     gas: BigInt(process.env.GAS_LIMIT_BAYAR || "550000"),
@@ -126,9 +126,9 @@ export async function kirimBayar(ke: Address, jumlahWei: bigint): Promise<HasilB
   }
   if (receipt.status !== "success") return { txHash, hasil: "revert" };
 
-  const jebol = parseEventLogs({ abi: jebolVaultAbi, eventName: "Jebol", logs: receipt.logs }).find((l) =>
+  const crackie = parseEventLogs({ abi: crackieVaultAbi, eventName: "Crackie", logs: receipt.logs }).find((l) =>
     isAddressEqual(l.address, vault),
   );
-  if (jebol) return { txHash, hasil: "jebol", hadiah: formatEther(jebol.args.hadiah) };
+  if (crackie) return { txHash, hasil: "crackie", hadiah: formatEther(crackie.args.hadiah) };
   return { txHash, hasil: "dibayar" };
 }

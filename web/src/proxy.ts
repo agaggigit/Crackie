@@ -15,10 +15,9 @@ export function proxy(request: NextRequest) {
   }
 
   if (host === APP_HOST) {
-    // Tautan internal app memakai /app/..., di subdomain cukup /...
-    if (pathname === "/app" || pathname.startsWith("/app/")) {
-      return NextResponse.redirect(`https://${APP_HOST}${pathname.slice(4) || "/"}${search}`, 308);
-    }
+    // Tautan internal app memakai /app/..., jadi dilayani langsung tanpa redirect supaya navigasi di browser
+    // tetap mulus. Alamat pendek (/, /agent/kopibot, /pemilik) ditulis ulang ke /app/...
+    if (pathname === "/app" || pathname.startsWith("/app/")) return NextResponse.next();
     const url = request.nextUrl.clone();
     url.pathname = pathname === "/" ? "/app" : `/app${pathname}`;
     return NextResponse.rewrite(url);

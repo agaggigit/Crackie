@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test, console} from "forge-std/Test.sol";
-import {JebolVault} from "../src/JebolVault.sol";
+import {CrackieVault} from "../src/CrackieVault.sol";
 
 interface IIdentityRegistry {
     function register() external returns (uint256 agentId);
@@ -13,15 +13,15 @@ interface IReputationRegistryBaca {
 }
 
 /// @notice Ukur gas `bayar` terhadap registry ERC-8004 asli di fork Monad testnet.
-/// @dev forge test --match-path test/JebolVault.fork.t.sol --fork-url monad_testnet -vv
+/// @dev forge test --match-path test/CrackieVault.fork.t.sol --fork-url monad_testnet -vv
 ///      Angka ini memakai harga gas Ethereum (EVM lokal), bukan Monad. Di Monad akses akun dingin
 ///      10.100 (bukan 2.600) dan slot dingin 8.100 (bukan 2.100), jadi angka asli lebih besar.
 ///      Angka final untuk BE wajib dari `cast estimate` ke RPC testnet setelah deploy.
-contract JebolVaultForkTest is Test {
+contract CrackieVaultForkTest is Test {
     address constant IDENTITY = 0x8004A818BFB912233c491871b3d84c89A494BD9e;
     address constant REPUTATION = 0x8004B663056A597Dffe9eCcC1965A193B7388713;
 
-    JebolVault vault;
+    CrackieVault vault;
     address pemilik = makeAddr("pemilik");
     address agent = makeAddr("agent");
     address supplier = makeAddr("supplier");
@@ -31,7 +31,7 @@ contract JebolVaultForkTest is Test {
     function setUp() public {
         if (block.chainid != 10143) return;
 
-        vault = new JebolVault(pemilik, agent, 0.1 ether, 0.5 ether, 300, keccak256("kopibot"));
+        vault = new CrackieVault(pemilik, agent, 0.1 ether, 0.5 ether, 300, keccak256("kopibot"));
         vm.deal(pemilik, 10 ether);
 
         vm.prank(pemilik);
@@ -68,7 +68,7 @@ contract JebolVaultForkTest is Test {
         assertEq(IReputationRegistryBaca(REPUTATION).getLastIndex(agentId, address(vault)), 1);
     }
 
-    function test_fork_gasJalurRevertSetelahJebol() public hanyaFork {
+    function test_fork_gasJalurRevertSetelahCrackie() public hanyaFork {
         vm.prank(agent);
         vault.bayar(penyerang, 0.05 ether);
 
@@ -77,7 +77,7 @@ contract JebolVaultForkTest is Test {
         try vault.bayar(supplier, 0.05 ether) {
             revert("seharusnya revert");
         } catch {}
-        console.log("gas revert (setelah jebol):", awal - gasleft());
+        console.log("gas revert (setelah crackie):", awal - gasleft());
     }
 
     /// @dev Cari gas limit transaksi terkecil yang masih menulis ERC-8004.

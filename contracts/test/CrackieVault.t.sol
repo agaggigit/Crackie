@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {JebolVault} from "../src/JebolVault.sol";
+import {CrackieVault} from "../src/CrackieVault.sol";
 
 // -------------------------------------------------------------------------
 // Mock
@@ -22,11 +22,11 @@ contract PemakanGas {
 
 /// @dev Awalnya menolak MON (hadiah jadi tertunda), lalu saat klaim mencoba masuk ulang.
 contract PenyerangReentrancy {
-    JebolVault public vault;
+    CrackieVault public vault;
     bool public tolak = true;
     bool public masukUlangBerhasil;
 
-    constructor(JebolVault v) {
+    constructor(CrackieVault v) {
         vault = v;
     }
 
@@ -40,7 +40,7 @@ contract PenyerangReentrancy {
 
     receive() external payable {
         if (tolak) revert("tolak");
-        (bool ok,) = address(vault).call(abi.encodeCall(JebolVault.klaimHadiah, ()));
+        (bool ok,) = address(vault).call(abi.encodeCall(CrackieVault.klaimHadiah, ()));
         masukUlangBerhasil = ok;
     }
 }
@@ -90,8 +90,8 @@ contract RegistryPemakanGas {
 // Test
 // -------------------------------------------------------------------------
 
-contract JebolVaultTest is Test {
-    JebolVault vault;
+contract CrackieVaultTest is Test {
+    CrackieVault vault;
 
     address pemilik = makeAddr("pemilik");
     address agent = makeAddr("agent");
@@ -107,7 +107,7 @@ contract JebolVaultTest is Test {
 
     event PercobaanTercatat(address indexed penyerang, bytes32 hashPesan, uint256 ke);
     event Dibayar(address indexed ke, uint256 jumlah);
-    event Jebol(address indexed penemu, uint256 hadiah, bytes32 sidikJari);
+    event Crackie(address indexed penemu, uint256 hadiah, bytes32 sidikJari);
     event WewenangDicabut();
     event DinyalakanLagi(bytes32 sidikJari);
     event SidikJariDiganti(bytes32 sidikJari);
@@ -115,7 +115,7 @@ contract JebolVaultTest is Test {
     function setUp() public {
         vm.deal(pemilik, 100 ether);
         vm.startPrank(pemilik);
-        vault = new JebolVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
+        vault = new CrackieVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
         vault.setorUtama{value: 1 ether}();
         vault.isiCelengan{value: 0.5 ether}(block.timestamp + MIN_KUNCI);
         vault.aturAllowlist(supplier, true);
@@ -126,7 +126,7 @@ contract JebolVaultTest is Test {
     // Helper
     // ---------------------------------------------------------------------
 
-    function _jebol(address ke, uint256 jumlah) internal {
+    function _crackie(address ke, uint256 jumlah) internal {
         vm.prank(agent);
         vault.bayar(ke, jumlah);
     }
@@ -156,16 +156,16 @@ contract JebolVaultTest is Test {
     }
 
     function test_constructor_parameterTidakValid() public {
-        vm.expectRevert(JebolVault.AlamatTidakValid.selector);
-        new JebolVault(pemilik, address(0), LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
-        vm.expectRevert(JebolVault.AlamatTidakValid.selector);
-        new JebolVault(address(0), agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
-        vm.expectRevert(JebolVault.ParameterTidakValid.selector);
-        new JebolVault(pemilik, agent, 0, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
-        vm.expectRevert(JebolVault.ParameterTidakValid.selector);
-        new JebolVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_TX - 1, MIN_KUNCI, SIDIK_JARI);
-        vm.expectRevert(JebolVault.SidikJariKosong.selector);
-        new JebolVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, bytes32(0));
+        vm.expectRevert(CrackieVault.AlamatTidakValid.selector);
+        new CrackieVault(pemilik, address(0), LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
+        vm.expectRevert(CrackieVault.AlamatTidakValid.selector);
+        new CrackieVault(address(0), agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
+        vm.expectRevert(CrackieVault.ParameterTidakValid.selector);
+        new CrackieVault(pemilik, agent, 0, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
+        vm.expectRevert(CrackieVault.ParameterTidakValid.selector);
+        new CrackieVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_TX - 1, MIN_KUNCI, SIDIK_JARI);
+        vm.expectRevert(CrackieVault.SidikJariKosong.selector);
+        new CrackieVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, bytes32(0));
     }
 
     // ---------------------------------------------------------------------
@@ -186,7 +186,7 @@ contract JebolVaultTest is Test {
 
     function test_normal_melebihiLimitPerTx() public {
         vm.prank(agent);
-        vm.expectRevert(JebolVault.MelebihiLimitPerTx.selector);
+        vm.expectRevert(CrackieVault.MelebihiLimitPerTx.selector);
         vault.bayar(supplier, LIMIT_PER_TX + 1);
     }
 
@@ -194,7 +194,7 @@ contract JebolVaultTest is Test {
         vm.startPrank(agent);
         vault.bayar(supplier, 0.1 ether);
         vault.bayar(supplier, 0.1 ether);
-        vm.expectRevert(JebolVault.MelebihiLimitPerJam.selector);
+        vm.expectRevert(CrackieVault.MelebihiLimitPerJam.selector);
         vault.bayar(supplier, 0.1 ether);
 
         vm.warp(block.timestamp + 1 hours);
@@ -207,19 +207,19 @@ contract JebolVaultTest is Test {
         vm.prank(pemilik);
         vault.tarikUtama(0.98 ether);
         vm.prank(agent);
-        vm.expectRevert(JebolVault.DanaUtamaKurang.selector);
+        vm.expectRevert(CrackieVault.DanaUtamaKurang.selector);
         vault.bayar(supplier, 0.05 ether);
     }
 
     function test_normal_bukanAgent() public {
         vm.prank(penyerang);
-        vm.expectRevert(JebolVault.BukanAgent.selector);
+        vm.expectRevert(CrackieVault.BukanAgent.selector);
         vault.bayar(supplier, 0.01 ether);
     }
 
     function test_normal_jumlahNol() public {
         vm.prank(agent);
-        vm.expectRevert(JebolVault.JumlahNol.selector);
+        vm.expectRevert(CrackieVault.JumlahNol.selector);
         vault.bayar(supplier, 0);
     }
 
@@ -229,10 +229,10 @@ contract JebolVaultTest is Test {
 
     function test_alarm_atomik() public {
         vm.expectEmit(address(vault));
-        emit Jebol(penyerang, 0.05 ether, SIDIK_JARI);
+        emit Crackie(penyerang, 0.05 ether, SIDIK_JARI);
         vm.expectEmit(address(vault));
         emit WewenangDicabut();
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
 
         assertFalse(_aktif());
         assertEq(penyerang.balance, 0.05 ether);
@@ -241,13 +241,13 @@ contract JebolVaultTest is Test {
     }
 
     function test_alarm_jumlahDiAtasLimit_tidakRevert() public {
-        _jebol(penyerang, 5 ether);
+        _crackie(penyerang, 5 ether);
         assertFalse(_aktif());
         assertEq(penyerang.balance, LIMIT_PER_TX);
     }
 
     function test_alarm_celenganKurang_hadiahSisaCelengan() public {
-        JebolVault v = _vaultCelengan(0.03 ether);
+        CrackieVault v = _vaultCelengan(0.03 ether);
         vm.prank(agent);
         v.bayar(penyerang, 0.1 ether);
         assertEq(penyerang.balance, 0.03 ether);
@@ -255,9 +255,9 @@ contract JebolVaultTest is Test {
     }
 
     function test_alarm_celenganKosong_tetapBerbunyi() public {
-        JebolVault v = _vaultCelengan(0);
+        CrackieVault v = _vaultCelengan(0);
         vm.expectEmit(address(v));
-        emit Jebol(penyerang, 0, SIDIK_JARI);
+        emit Crackie(penyerang, 0, SIDIK_JARI);
         vm.prank(agent);
         v.bayar(penyerang, 0.1 ether);
         (bool a,,,,,,,,) = v.status();
@@ -266,33 +266,33 @@ contract JebolVaultTest is Test {
     }
 
     function test_alarm_alamatNol_hadiahNol() public {
-        _jebol(address(0), 0.05 ether);
+        _crackie(address(0), 0.05 ether);
         assertFalse(_aktif());
         assertEq(vault.celengan(), 0.5 ether);
     }
 
     function test_alarm_penerimaMenolak_hadiahTertunda() public {
         PenolakMON penolak = new PenolakMON();
-        _jebol(address(penolak), 0.05 ether);
+        _crackie(address(penolak), 0.05 ether);
 
         assertFalse(_aktif());
         assertEq(vault.hadiahTertunda(address(penolak)), 0.05 ether);
 
         vm.prank(orangLain);
-        vm.expectRevert(JebolVault.TidakAdaHadiah.selector);
+        vm.expectRevert(CrackieVault.TidakAdaHadiah.selector);
         vault.klaimHadiah();
     }
 
     function test_alarm_penerimaPemakanGas_tidakRevert() public {
         PemakanGas pemakan = new PemakanGas();
-        _jebol(address(pemakan), 0.05 ether);
+        _crackie(address(pemakan), 0.05 ether);
         assertFalse(_aktif());
         assertEq(vault.hadiahTertunda(address(pemakan)), 0.05 ether);
     }
 
     function test_alarm_reentrancySaatKlaim_gagal() public {
         PenyerangReentrancy r = new PenyerangReentrancy(vault);
-        _jebol(address(r), 0.05 ether);
+        _crackie(address(r), 0.05 ether);
         assertEq(vault.hadiahTertunda(address(r)), 0.05 ether);
 
         r.aturTolak(false);
@@ -307,18 +307,18 @@ contract JebolVaultTest is Test {
         vm.prank(pemilik);
         vault.aturErc8004(address(reg), 42);
 
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
         assertEq(reg.jumlahPanggilan(), 1);
         assertEq(reg.agentIdTerakhir(), 42);
         assertEq(reg.nilaiTerakhir(), -100);
-        assertEq(reg.tagTerakhir(), "jebol");
+        assertEq(reg.tagTerakhir(), "crackie");
     }
 
     function test_alarm_erc8004Revert_alarmTetapJalan() public {
         RegistryRevert reg = new RegistryRevert();
         vm.prank(pemilik);
         vault.aturErc8004(address(reg), 1);
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
         assertFalse(_aktif());
         assertEq(penyerang.balance, 0.05 ether);
     }
@@ -327,7 +327,7 @@ contract JebolVaultTest is Test {
         RegistryPemakanGas reg = new RegistryPemakanGas();
         vm.prank(pemilik);
         vault.aturErc8004(address(reg), 1);
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
         assertFalse(_aktif());
         assertEq(penyerang.balance, 0.05 ether);
     }
@@ -335,7 +335,7 @@ contract JebolVaultTest is Test {
     function test_alarm_erc8004BukanKontrak_dilewati() public {
         vm.prank(pemilik);
         vault.aturErc8004(makeAddr("eoa"), 1);
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
         assertFalse(_aktif());
     }
 
@@ -358,7 +358,7 @@ contract JebolVaultTest is Test {
         jumlah = bound(jumlah, 1, type(uint256).max);
 
         uint256 celenganAwal = vault.celengan();
-        _jebol(ke, jumlah);
+        _crackie(ke, jumlah);
 
         assertFalse(_aktif());
         uint256 hadiahMaks = jumlah < LIMIT_PER_TX ? jumlah : LIMIT_PER_TX;
@@ -366,22 +366,22 @@ contract JebolVaultTest is Test {
     }
 
     // ---------------------------------------------------------------------
-    // Setelah jebol
+    // Setelah crackie
     // ---------------------------------------------------------------------
 
-    function test_setelahJebol_bayarRevert() public {
-        _jebol(penyerang, 0.05 ether);
+    function test_setelahCrackie_bayarRevert() public {
+        _crackie(penyerang, 0.05 ether);
         vm.startPrank(agent);
-        vm.expectRevert(JebolVault.AgentTidakAktif.selector);
+        vm.expectRevert(CrackieVault.AgentTidakAktif.selector);
         vault.bayar(penyerang, 0.05 ether);
-        vm.expectRevert(JebolVault.AgentTidakAktif.selector);
+        vm.expectRevert(CrackieVault.AgentTidakAktif.selector);
         vault.bayar(supplier, 0.01 ether);
         vm.stopPrank();
     }
 
-    function test_setelahJebol_catatPercobaanTetapJalan() public {
+    function test_setelahCrackie_catatPercobaanTetapJalan() public {
         _catat(penyerang, keccak256("a"));
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
         _catat(penyerang, keccak256("b"));
 
         (,,,, uint256 total, uint256 sejakNyala,,,) = vault.status();
@@ -389,27 +389,27 @@ contract JebolVaultTest is Test {
         assertEq(sejakNyala, 0);
     }
 
-    function test_setelahJebol_pemilikTarikUtamaDanCelengan() public {
-        _jebol(penyerang, 0.05 ether);
+    function test_setelahCrackie_pemilikTarikUtamaDanCelengan() public {
+        _crackie(penyerang, 0.05 ether);
         uint256 awal = pemilik.balance;
 
         vm.startPrank(pemilik);
         vault.tarikUtama(1 ether);
-        vault.tarikCelengan(); // sebelum kunciSampai, boleh karena sudah jebol
+        vault.tarikCelengan(); // sebelum kunciSampai, boleh karena sudah crackie
         vm.stopPrank();
 
         assertEq(pemilik.balance - awal, 1.45 ether);
         assertEq(address(vault).balance, 0);
     }
 
-    function test_setelahJebol_nyalakanLagi() public {
+    function test_setelahCrackie_nyalakanLagi() public {
         _catat(penyerang, keccak256("a"));
-        _jebol(penyerang, 0.05 ether);
+        _crackie(penyerang, 0.05 ether);
 
         vm.startPrank(pemilik);
-        vm.expectRevert(JebolVault.SidikJariSama.selector);
+        vm.expectRevert(CrackieVault.SidikJariSama.selector);
         vault.nyalakanLagi(SIDIK_JARI);
-        vm.expectRevert(JebolVault.SidikJariKosong.selector);
+        vm.expectRevert(CrackieVault.SidikJariKosong.selector);
         vault.nyalakanLagi(bytes32(0));
 
         vm.expectEmit(address(vault));
@@ -430,7 +430,7 @@ contract JebolVaultTest is Test {
 
     function test_nyalakanLagi_saatAktifRevert() public {
         vm.prank(pemilik);
-        vm.expectRevert(JebolVault.AgentMasihAktif.selector);
+        vm.expectRevert(CrackieVault.AgentMasihAktif.selector);
         vault.nyalakanLagi(SIDIK_JARI_2);
     }
 
@@ -440,7 +440,7 @@ contract JebolVaultTest is Test {
 
     function test_celengan_tarikSebelumKunciRevert() public {
         vm.prank(pemilik);
-        vm.expectRevert(JebolVault.CelenganMasihTerkunci.selector);
+        vm.expectRevert(CrackieVault.CelenganMasihTerkunci.selector);
         vault.tarikCelengan();
     }
 
@@ -458,11 +458,11 @@ contract JebolVaultTest is Test {
         uint256 kunci = vault.kunciSampai();
         vault.isiCelengan(kunci + 1 hours);
 
-        vm.expectRevert(JebolVault.KunciTerlaluPendek.selector);
+        vm.expectRevert(CrackieVault.KunciTerlaluPendek.selector);
         vault.isiCelengan(kunci);
 
         vm.warp(block.timestamp + 2 hours);
-        vm.expectRevert(JebolVault.KunciTerlaluPendek.selector);
+        vm.expectRevert(CrackieVault.KunciTerlaluPendek.selector);
         vault.isiCelengan(block.timestamp + MIN_KUNCI - 1);
         vm.stopPrank();
     }
@@ -470,19 +470,19 @@ contract JebolVaultTest is Test {
     function test_pemilikSaja() public {
         vm.deal(orangLain, 1 ether);
         vm.startPrank(orangLain);
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.setorUtama{value: 1}();
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.tarikUtama(1);
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.tarikCelengan();
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.aturAllowlist(orangLain, true);
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.aturSidikJari(SIDIK_JARI_2);
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.nyalakanLagi(SIDIK_JARI_2);
-        vm.expectRevert(JebolVault.BukanPemilik.selector);
+        vm.expectRevert(CrackieVault.BukanPemilik.selector);
         vault.aturErc8004(address(1), 1);
         vm.stopPrank();
     }
@@ -496,9 +496,9 @@ contract JebolVaultTest is Test {
 
     function test_allowlist_alamatTidakValid() public {
         vm.startPrank(pemilik);
-        vm.expectRevert(JebolVault.AlamatTidakValid.selector);
+        vm.expectRevert(CrackieVault.AlamatTidakValid.selector);
         vault.aturAllowlist(address(0), true);
-        vm.expectRevert(JebolVault.AlamatTidakValid.selector);
+        vm.expectRevert(CrackieVault.AlamatTidakValid.selector);
         vault.aturAllowlist(address(vault), true);
         vm.stopPrank();
     }
@@ -533,7 +533,7 @@ contract JebolVaultTest is Test {
     function test_skor_nolSaatTidakAktif() public {
         _catat(penyerang, bytes32(0));
         vm.warp(block.timestamp + 100);
-        _jebol(penyerang, 0.01 ether);
+        _crackie(penyerang, 0.01 ether);
         assertEq(vault.skor(), 0);
     }
 
@@ -571,9 +571,9 @@ contract JebolVaultTest is Test {
     }
 
     function test_aturSidikJari_saatTidakAktifRevert() public {
-        _jebol(penyerang, 0.01 ether);
+        _crackie(penyerang, 0.01 ether);
         vm.prank(pemilik);
-        vm.expectRevert(JebolVault.AgentTidakAktif.selector);
+        vm.expectRevert(CrackieVault.AgentTidakAktif.selector);
         vault.aturSidikJari(SIDIK_JARI_2);
     }
 
@@ -586,7 +586,7 @@ contract JebolVaultTest is Test {
         emit PercobaanTercatat(penyerang, keccak256("a"), 1);
         _catat(penyerang, keccak256("a"));
 
-        _jebol(penyerang, 0.01 ether);
+        _crackie(penyerang, 0.01 ether);
         vm.prank(pemilik);
         vault.nyalakanLagi(SIDIK_JARI_2);
 
@@ -600,7 +600,7 @@ contract JebolVaultTest is Test {
             _catat(penyerang, bytes32(i));
         }
         vm.prank(penyerang);
-        vm.expectRevert(JebolVault.TerlaluBanyakPercobaan.selector);
+        vm.expectRevert(CrackieVault.TerlaluBanyakPercobaan.selector);
         vault.catatPercobaan(bytes32(uint256(99)));
 
         _catat(orangLain, bytes32(0)); // wallet lain tidak terpengaruh
@@ -613,9 +613,9 @@ contract JebolVaultTest is Test {
     // Helper vault dengan celengan tertentu
     // ---------------------------------------------------------------------
 
-    function _vaultCelengan(uint256 isi) internal returns (JebolVault v) {
+    function _vaultCelengan(uint256 isi) internal returns (CrackieVault v) {
         vm.startPrank(pemilik);
-        v = new JebolVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
+        v = new CrackieVault(pemilik, agent, LIMIT_PER_TX, LIMIT_PER_JAM, MIN_KUNCI, SIDIK_JARI);
         if (isi > 0) v.isiCelengan{value: isi}(block.timestamp + MIN_KUNCI);
         vm.stopPrank();
     }

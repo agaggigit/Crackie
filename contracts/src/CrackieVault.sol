@@ -15,11 +15,11 @@ interface IReputationRegistry {
     ) external;
 }
 
-/// @title JebolVault
+/// @title CrackieVault
 /// @notice Wallet AI agent dengan alarm. Pembayaran ke luar allowlist diambil dari celengan,
 ///         dan wewenang agent dicabut di transaksi yang sama.
 /// @dev Spesifikasi: docs/prd/sc.md dan docs/plan.md Bagian 4 dan 13.
-contract JebolVault {
+contract CrackieVault {
     // ---------------------------------------------------------------------
     // Konstanta
     // ---------------------------------------------------------------------
@@ -83,7 +83,7 @@ contract JebolVault {
 
     event PercobaanTercatat(address indexed penyerang, bytes32 hashPesan, uint256 ke);
     event Dibayar(address indexed ke, uint256 jumlah);
-    event Jebol(address indexed penemu, uint256 hadiah, bytes32 sidikJari);
+    event Crackie(address indexed penemu, uint256 hadiah, bytes32 sidikJari);
     event WewenangDicabut();
     event DinyalakanLagi(bytes32 sidikJari);
     event SidikJariDiganti(bytes32 sidikJari);
@@ -194,7 +194,7 @@ contract JebolVault {
         celengan -= hadiah;
         aktif = false;
         _resetRating();
-        emit Jebol(ke, hadiah, sidikJari);
+        emit Crackie(ke, hadiah, sidikJari);
         emit WewenangDicabut();
 
         // Interactions: ERC-8004 lalu hadiah, keduanya dengan batas gas dan tidak boleh menggagalkan alarm.
@@ -214,7 +214,7 @@ contract JebolVault {
         if (gasleft() < GAS_ERC8004 + GAS_TRANSFER_HADIAH + CADANGAN_GAS) return;
 
         try IReputationRegistry(registry).giveFeedback{gas: GAS_ERC8004}(
-            agentId, -100, 0, "jebol", "", "", "", bytes32(0)
+            agentId, -100, 0, "crackie", "", "", "", bytes32(0)
         ) {} catch {}
     }
 
@@ -238,7 +238,7 @@ contract JebolVault {
         emit PercobaanTercatat(msg.sender, hashPesan, totalPercobaan);
     }
 
-    /// @notice Mengambil hadiah yang gagal dikirim otomatis saat jebol.
+    /// @notice Mengambil hadiah yang gagal dikirim otomatis saat crackie.
     function klaimHadiah() external nonReentrant {
         uint256 jumlah = hadiahTertunda[msg.sender];
         if (jumlah == 0) revert TidakAdaHadiah();
@@ -264,14 +264,14 @@ contract JebolVault {
         kunciSampai = kunciSampaiBaru;
     }
 
-    /// @notice Kapan pun, termasuk setelah jebol.
+    /// @notice Kapan pun, termasuk setelah crackie.
     function tarikUtama(uint256 jumlah) external hanyaPemilik nonReentrant {
         if (jumlah > danaUtama) revert DanaUtamaKurang();
         danaUtama -= jumlah;
         _kirim(pemilik, jumlah);
     }
 
-    /// @notice Setelah kunciSampai, atau kapan pun setelah jebol (plan Bagian 15 nomor 7).
+    /// @notice Setelah kunciSampai, atau kapan pun setelah crackie (plan Bagian 15 nomor 7).
     function tarikCelengan() external hanyaPemilik nonReentrant {
         if (aktif && block.timestamp < kunciSampai) revert CelenganMasihTerkunci();
         uint256 jumlah = celengan;
@@ -294,7 +294,7 @@ contract JebolVault {
         emit SidikJariDiganti(hashKonfigurasi);
     }
 
-    /// @notice Menyalakan agent lagi setelah jebol, wajib dengan sidik jari baru.
+    /// @notice Menyalakan agent lagi setelah crackie, wajib dengan sidik jari baru.
     function nyalakanLagi(bytes32 sidikJariBaru) external hanyaPemilik {
         if (aktif) revert AgentMasihAktif();
         if (sidikJariBaru == bytes32(0)) revert SidikJariKosong();

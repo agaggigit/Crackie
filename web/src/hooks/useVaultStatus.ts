@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo } from "react";
+import { useStartTime } from "@/hooks/useStartTime";
 import { useReadContract } from "wagmi";
 import type { Hex } from "viem";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
@@ -18,10 +19,6 @@ export type VaultStatus = {
   sidikJari: Hex;
 };
 
-let mulai = 0;
-const waktuMulai = () => (mulai ||= Math.floor(Date.now() / 1000));
-const noop = () => () => {};
-
 // Status vault dibaca langsung dari chain (bukan dari BE), diperbarui tiap 4 detik.
 export function useVaultStatus() {
   const query = useReadContract({
@@ -32,7 +29,7 @@ export function useVaultStatus() {
   });
 
   // Data demo dibuat di browser saja supaya prerender tidak memakai jam.
-  const t0 = useSyncExternalStore(noop, waktuMulai, () => 0);
+  const t0 = useStartTime();
   const demo = useMemo(() => (VAULT_READY || t0 === 0 ? null : demoStatus(t0)), [t0]);
 
   const status: VaultStatus | undefined = useMemo(() => {

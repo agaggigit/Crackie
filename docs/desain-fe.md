@@ -45,15 +45,15 @@ Radius: chip 8, input 16 sampai 26, kartu 28 sampai 36, hero 44, tombol pill.
 | A2 Agent / Ready v2 | Kartu bounty navy + Jebi, chat, aktivitas |
 | A3 Agent / Sending | Stepper 4 bar (Locked, Recorded, Reading, Result), komposer terkunci |
 | A4 Agent / Held out | Kartu "KopiBot held out" + varian "Paid an approved supplier" |
-| A5 Agent / Broke v2 | Modal alarm oranye penuh, Jebi jebol, hadiah, tombol receipt |
+| A5 Agent / Broke v2 | Modal alarm oranye penuh, Jebi pose broken, hadiah, tombol receipt |
 | A6 Agent / Stopped | Banner berhenti, hasil "Payment refused", varian "Claim bounty" |
 | A7 My agents / KopiBot | Panel pemilik: dana utama, bounty, supplier, invoice demo, setup, reputasi, try terbaru |
 | A8 Get test MON | Modal faucet |
 | A9 States | Semua keadaan komposer: belum connect, salah jaringan, tidak ada MON, kuota habis, agent offline, sibuk, menunggu konfirmasi, dibatalkan, mode demo |
-| M2, M5 | Mobile 390: halaman agent (tab Chat/Activity) dan momen jebol |
+| M2, M5 | Mobile 390: halaman agent (tab Chat/Activity) dan momen alarm |
 | L1 Landing v2 | Landing (dikerjakan terakhir) |
 
 ## 5. Responsif
 - **≥ 1280:** tiga kolom (kartu bounty 400, chat, aktivitas 330).
 - **768 sampai 1279:** dua kolom (kartu bounty di kiri, chat di kanan). Aktivitas pindah ke bawah chat.
-- **< 768:** satu kolom. Kartu bounty mendatar (tinggi 220), statistik 3 kotak, tab Chat/Activity. Modal jebol jadi layar penuh.
+- **< 768:** satu kolom. Kartu bounty mendatar (tinggi 220), statistik 3 kotak, tab Chat/Activity. Modal alarm jadi layar penuh.

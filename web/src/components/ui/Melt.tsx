@@ -18,7 +18,7 @@ const VARIANTS: Record<string, Shape[]> = {
     { d: "M800 0 C640 160 700 420 520 560 C360 680 120 600 0 760 L0 0Z", fill: "#FF6A1F", blur: 80 },
     { d: "M0 0 C200 80 360 0 560 60 L560 300 C360 360 160 260 0 320Z", fill: "#FFC9A0", blur: 80 },
   ],
-  // Oranye penuh untuk momen jebol.
+  // Oranye penuh untuk momen alarm.
   alarm: [
     { d: "M0 520 C200 400 480 620 800 460 L800 900 L0 900Z", fill: "#E24E0A", blur: 80 },
     { d: "M100 0 C300 120 520 40 800 140 L800 360 C520 300 300 380 100 260Z", fill: "#FFC9A0", blur: 90 },

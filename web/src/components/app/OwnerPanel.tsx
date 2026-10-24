@@ -321,6 +321,19 @@ function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current
   };
   return (
     <Card title={stopped ? "Restart KopiBot" : "Setup"} icon={<SlidersHorizontal size={16} aria-hidden />}>
+      {current ? (
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-cream px-4 py-3">
+          <span className="text-[13px] text-ink-2">Current setup</span>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard?.writeText(current)}
+            title="Copy"
+            className="font-mono text-[13px] font-semibold hover:text-orange"
+          >
+            {current.slice(0, 8)}…{current.slice(-6)}
+          </button>
+        </div>
+      ) : null}
       <label className="sr-only" htmlFor="setup-id">
         Setup ID
       </label>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { BaseError, UserRejectedRequestError, type Hash } from "viem";
+import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, vaultAbi } from "@/config/vault";
 
 type State = { kind: "idle" } | { kind: "signing" } | { kind: "pending"; hash: Hash } | { kind: "done"; hash: Hash } | { kind: "error"; message: string; detail?: string };
@@ -23,7 +24,7 @@ export function useVaultWrite(onDone?: () => void) {
     try {
       // ABI parseAbi bertipe ketat; nama fungsi dan argumen dicek di pemanggil.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      hash = await writeContractAsync({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: functionName as any, args: args as any, value } as any);
+      hash = await writeContractAsync({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: functionName as any, args: args as any, value, chainId: monadTestnet.id } as any);
     } catch (e) {
       const rejected = e instanceof BaseError && e.walk((x) => x instanceof UserRejectedRequestError);
       const detail = e instanceof BaseError ? e.shortMessage : String(e);

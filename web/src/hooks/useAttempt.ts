@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { usePublicClient, useWriteContract } from "wagmi";
 import { BaseError, decodeEventLog, formatEther, keccak256, toBytes, UserRejectedRequestError, type Hash } from "viem";
+import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
 
 export type HasilBayar = "dibayar" | "jebol" | "revert" | "tertunda";
@@ -110,7 +111,7 @@ export function useAttempt({ onSettled }: { onSettled?: (o?: Outcome) => void } 
         if (VAULT_READY) {
           setStep("signing");
           try {
-            txHash = await writeContractAsync({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "catatPercobaan", args: [hashPesan] });
+            txHash = await writeContractAsync({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "catatPercobaan", args: [hashPesan], chainId: monadTestnet.id });
           } catch (e) {
             const rejected = e instanceof BaseError && e.walk((x) => x instanceof UserRejectedRequestError);
             patch(id, { error: rejected ? "rejected" : "not_recorded" });

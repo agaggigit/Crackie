@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Activity } from "@/components/app/Activity";
 import { BountyPanel } from "@/components/app/BountyPanel";
 import { useVaultConfig } from "@/hooks/useVaultConfig";
 import { useVaultStatus } from "@/hooks/useVaultStatus";
@@ -25,7 +26,7 @@ export function AgentRoom() {
       <div className="grid flex-1 gap-3 lg:grid-cols-[400px_minmax(0,1fr)_330px]">
         <BountyPanel status={status} isDemo={isDemo} mood={mood} maxPerWin={limitPerTx ? formatMon(limitPerTx) : "–"} />
         <section aria-label="Chat" className="min-h-[420px] rounded-[36px] bg-white p-6" />
-        <section aria-label="Activity" className="min-h-[300px] rounded-[36px] bg-white p-6" />
+        <Activity className="lg:max-h-[calc(100dvh-170px)] lg:overflow-y-auto" />
       </div>
     </>
   );

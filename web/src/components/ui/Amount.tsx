@@ -3,7 +3,7 @@ import { splitMon } from "@/utils/format";
 // Angka besar dengan desimal dipudarkan.
 export function Amount({
   wei,
-  decimals = 2,
+  decimals = 4,
   unit = "MON",
   className = "",
   unitClassName = "",

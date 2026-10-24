@@ -396,7 +396,7 @@ Private key agent dan API key LLM disimpan di environment variable Vercel, tidak
 |---|---|
 | 09.00 | Registrasi. Cek WiFi, RPC, API key LLM, saldo testnet MON |
 | 10.00–11.45 | Pembukaan, Monad 101, **Winning Strategy Session** (catat kriteria juri, cek ulang angka Monad), Growing Indonads |
-| 12.00–13.00 | Repo baru dari nol. SC: kerangka kontrak. BE: agent tersambung ke LLM. FE: kerangka halaman + deploy kosong ke Vercel |
+| 12.00–13.00 | SC: kerangka kontrak. BE: agent tersambung ke LLM. FE: kerangka halaman + deploy kosong ke Vercel |
 | 13.00 | Makan bergantian, jangan semua berhenti bersamaan |
 | 13.30–15.00 | SC deploy versi pertama dan bagikan alamat + ABI. BE: agent bisa membayar lewat kontrak. FE: membaca `status()` |
 | 15.00–16.30 | Integrasi end-to-end: percobaan tercatat → pesan → agent tertipu → alarm → wewenang dicabut → rating reset |
@@ -466,8 +466,7 @@ Yang **tidak boleh dipotong:** jalur alarm + pencabutan wewenang, `catatPercobaa
 1. **Ide sudah dikunci.** Keberatan besar → pakai cadangan (Wasit, `docs/brainstorming/wasit-cadangan.md`), bukan ide baru.
 2. **Kejujuran klaim adalah senjata kita.** Ikuti Bagian 6.
 3. **Demo yang jalan lebih penting dari fitur yang banyak.** Jam 16.30 integrasi belum jalan → potong fitur sesuai urutan di Bagian 14, jangan potong latihan demo.
-4. **Repo ini untuk latihan dan membangun produk sampai jadi.** Hari H memakai repo baru dari nol. Pre-building dilarang panitia. Yang boleh dibawa hanya dokumen, slide, dan teks serangan.
-5. Cara kerja (PRD, branch, PR, review) ada di `docs/alur-kerja.md`.
+4. Cara kerja (PRD, branch, PR, review) ada di `docs/alur-kerja.md`.
 
 ---
 

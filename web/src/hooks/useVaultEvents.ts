@@ -91,28 +91,50 @@ export function useVaultEvents() {
         return sortDesc([...prev, ...add.filter((a) => !seen.has(a.id))]).slice(0, MAX_ITEMS);
       });
 
+    // Satu potongan dicoba dua kali. Kalau tetap gagal, dilewati supaya riwayat lain tetap tampil.
+    const getLogsSafe = async (f: bigint, t: bigint) => {
+      for (let i = 0; i < 2; i++) {
+        try {
+          return await getLogs(f, t);
+        } catch {
+          // dicoba lagi
+        }
+      }
+      failed = true;
+      return [] as RawLog[];
+    };
+    let failed = false;
+
     (async () => {
       try {
         const latest = await client.getBlockNumber();
         last = latest;
-        // Riwayat dibaca mundur dari blok terbaru, beberapa potongan sekaligus, sampai cukup atau sampai blok deploy.
+        // Blok awal: dari env, kalau kosong dibaca dari blokDeploy() di kontrak, kalau gagal dibatasi MAX_CHUNKS potongan.
+        let start = VAULT_DEPLOY_BLOCK;
+        if (start === 0n) {
+          start = await client
+            .readContract({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "blokDeploy" })
+            .catch(() => (latest > CHUNK * BigInt(MAX_CHUNKS) ? latest - CHUNK * BigInt(MAX_CHUNKS) : 0n));
+        }
+        // Riwayat dibaca mundur dari blok terbaru, beberapa potongan sekaligus, dan ditampilkan per gelombang.
         let to = latest;
         let chunks = 0;
-        const found: VaultEventItem[] = [];
-        while (to >= VAULT_DEPLOY_BLOCK && found.length < MAX_ITEMS && chunks < MAX_CHUNKS && !stop) {
+        let total = 0;
+        while (to >= start && total < MAX_ITEMS && chunks < MAX_CHUNKS && !stop) {
           const ranges: [bigint, bigint][] = [];
-          for (let i = 0; i < PARALLEL && to >= VAULT_DEPLOY_BLOCK; i++) {
-            const from = to - CHUNK + 1n > VAULT_DEPLOY_BLOCK ? to - CHUNK + 1n : VAULT_DEPLOY_BLOCK;
+          for (let i = 0; i < PARALLEL && to >= start; i++) {
+            const from = to - CHUNK + 1n > start ? to - CHUNK + 1n : start;
             ranges.push([from, to]);
             to = from - 1n;
           }
           chunks += ranges.length;
-          const results = await Promise.all(ranges.map(([f, t]) => getLogs(f, t)));
-          found.push(...results.flat().map(toItem).filter((x): x is VaultEventItem => x !== null));
+          const results = await Promise.all(ranges.map(([f, t]) => getLogsSafe(f, t)));
+          const found = results.flat().map(toItem).filter((x): x is VaultEventItem => x !== null);
+          total += found.length;
+          if (found.length && !stop) merge(await withTimes(found));
+          if (chunks === ranges.length && !stop) setState("ready");
         }
-        if (stop) return;
-        merge(await withTimes(found));
-        setState("ready");
+        if (!stop) setState(failed && total === 0 ? "error" : "ready");
       } catch {
         if (!stop) setState("error");
       }

@@ -19,8 +19,11 @@ export function Logo() {
   );
 }
 
+// Di app.crackie.xyz alamatnya tanpa /app (lihat src/proxy.ts), jadi disamakan dulu sebelum dicocokkan.
+const normalize = (p: string) => (p === "/app" || p.startsWith("/app/") ? p : `/app${p === "/" ? "" : p}`);
+
 export function AppNav() {
-  const pathname = usePathname();
+  const pathname = normalize(usePathname());
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 py-4 sm:py-5">
       <Link href="/app" aria-label="Crackie home">

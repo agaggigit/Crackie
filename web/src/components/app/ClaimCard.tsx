@@ -2,11 +2,13 @@
 
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { formatEther } from "viem";
+import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
 
 // Muncul kalau transfer hadiah otomatis gagal dan hadiah ditahan di hadiahTertunda (docs/prd/sc.md 3.4).
 export function ClaimCard() {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const wrongChain = chainId !== monadTestnet.id;
   const pending = useReadContract({
     address: VAULT_ADDRESS,
     abi: vaultAbi,
@@ -30,8 +32,8 @@ export function ClaimCard() {
       </div>
       <button
         type="button"
-        disabled={working}
-        onClick={() => write.writeContract({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "klaimHadiah" })}
+        disabled={working || wrongChain}
+        onClick={() => write.writeContract({ address: VAULT_ADDRESS, abi: vaultAbi, functionName: "klaimHadiah", chainId: monadTestnet.id })}
         className="h-10 rounded-full bg-orange px-5 text-sm font-semibold hover:bg-ember disabled:opacity-60"
       >
         {working ? "Claiming" : "Claim bounty"}

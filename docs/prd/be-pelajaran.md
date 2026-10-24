@@ -1,10 +1,10 @@
-# Pelajaran BE dari repo latihan
+# Pelajaran BE dari latihan sebelum acara
 
 > **Pemilik:** @agaggigit
-> **Untuk:** agent dan anggota tim yang membangun ulang BE di repo hari H
+> **Untuk:** agent dan anggota tim yang membangun BE di repo ini
 > **Mengacu ke:** `docs/prd/be.md` (desain), `docs/plan.md` Bagian 13 (antarmuka)
 
-Dokumen ini merangkum hal yang **tidak terlihat dari PRD** tapi kami temukan saat membangun BE di repo latihan (PR #6 dan #7, 23–24 Okt 2026). Isinya sengaja berupa prosa dan checklist, bukan kode: kode di repo latihan tidak dibawa ke repo hari H (aturan pre-building). Desainnya tetap mengikuti `docs/prd/be.md`; kalau ada yang bertentangan, PRD dan plan yang berlaku.
+Dokumen ini merangkum hal yang **tidak terlihat dari PRD** tapi kami temukan saat latihan membangun BE sebelum acara (23–24 Okt 2026, di repo terpisah). Isinya sengaja berupa prosa dan checklist, bukan kode: kode latihan tidak dibawa, dan BE di repo ini ditulis dari nol saat acara. Desainnya tetap mengikuti `docs/prd/be.md`; kalau ada yang bertentangan, PRD dan plan yang berlaku.
 
 ## 1. Urutan membangun yang terbukti jalan
 Setiap tahap diuji sebelum lanjut. Dengan urutan ini, BE tidak pernah menunggu bagian lain.
@@ -15,7 +15,7 @@ Setiap tahap diuji sebelum lanjut. Dengan urutan ini, BE tidak pernah menunggu b
 4. **Endpoint pendukung.** `GET /api/kesehatan`, `POST /api/admin/tagihan`, `GET /api/admin/percobaan`.
 5. **Ganti ke kontrak SC asli di testnet**, ukur gas limit `bayar`, uji 7.3 di PRD.
 
-Jadwal hari H di `docs/prd/be.md` Bagian 8 memampatkan urutan ini. Kalau SC belum deploy saat tahap 3, pakai pola kontrak tiruan di anvil (ditulis ulang di repo baru).
+Jadwal hari H di `docs/prd/be.md` Bagian 8 memampatkan urutan ini. Kalau SC belum deploy saat tahap 3, pakai pola kontrak tiruan di anvil.
 
 ## 2. Jebakan yang sudah pernah kena
 Agent baru hampir pasti mengulangi ini kalau tidak diberi tahu.
@@ -61,7 +61,7 @@ Agent baru hampir pasti mengulangi ini kalau tidak diberi tahu.
 
 ## 3. Cara menguji yang terbukti berguna
 - **Skrip uji model** (PRD 7.2): setiap serangan dijalankan N kali dengan agent dan prompt yang **sama persis** dengan route, bukan salinan. Salinan prompt cepat berbeda dari yang dipakai route.
-- **Uji end-to-end di anvil** dengan kontrak tiruan dan akun bawaan anvil (#0 pemilik, #1 penyerang). Urutan yang diuji: kesehatan → 401 tanpa token → tagihan admin dibayar → serangan injeksi jebol → serangan kedua revert → replay 409 → hash salah 400 → detail serangan admin. Di repo latihan 13/13 lulus.
+- **Uji end-to-end di anvil** dengan kontrak tiruan dan akun bawaan anvil (#0 pemilik, #1 penyerang). Urutan yang diuji: kesehatan → 401 tanpa token → tagihan admin dibayar → serangan injeksi jebol → serangan kedua revert → replay 409 → hash salah 400 → detail serangan admin. Saat latihan 13/13 lulus.
 - **Skrip yang mengarahkan `next dev` ke anvil tanpa mengubah `.env.local`**, supaya tidak lupa mengembalikan RPC ke testnet.
 - **Skrip `sidik-jari`** yang mencetak hash konfigurasi untuk diisi SC di constructor.
 - Saat pindah ke testnet, jalankan ulang uji yang sama ke kontrak SC asli (PRD 7.3) dan ukur gas `bayar` dari receipt.
@@ -73,4 +73,4 @@ Agent baru hampir pasti mengulangi ini kalau tidak diberi tahu.
 ## 5. Pilihan teknis yang terbukti cocok
 - Vercel AI SDK (`ai` v7) dengan `@ai-sdk/groq` dan `@ai-sdk/google`, viem, `@upstash/redis`, zod untuk skema tool.
 - Model `openai/gpt-oss-120b` di Groq, temperature 0,1 (hasil uji di PRD 7.2). Cadangan `gemini-3.5-flash-lite`, diganti manual.
-- Teks serangan di PRD 7.4 boleh dibawa apa adanya. Serangan demo: injeksi (jebol 10/10 di uji).
+- Teks serangan di PRD 7.4 dipakai apa adanya. Serangan demo: injeksi (jebol 10/10 di uji).

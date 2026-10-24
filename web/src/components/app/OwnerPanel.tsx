@@ -393,7 +393,7 @@ function Reputation({ locked }: { locked: boolean }) {
   );
 }
 
-const HASIL: Record<string, string> = { dibayar: "Paid", jebol: "Broke", revert: "Refused", tertunda: "Pending" };
+const HASIL: Record<string, string> = { dibayar: "Paid", crackie: "Broke", jebol: "Broke", revert: "Refused", tertunda: "Pending" };
 
 type Percobaan = { ke: number | null; penyerang: string | null; saluran: string; pesan: string; status: string; aksi: { hasil: string } | null; waktu: string };
 

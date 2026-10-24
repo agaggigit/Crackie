@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
-    // Optional x402 deps of @coinbase/cdp-sdk (via wallet connectors); not installed or used.
+    // Dependensi opsional x402 dari @coinbase/cdp-sdk (lewat konektor wallet), tidak dipasang dan tidak dipakai.
     resolveAlias: {
       "@x402/core/client": "./src/config/empty-module.cjs",
       "@x402/evm": "./src/config/empty-module.cjs",

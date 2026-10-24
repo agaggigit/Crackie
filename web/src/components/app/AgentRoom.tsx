@@ -1,0 +1,176 @@
+"use client";
+
+import { Lock } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useState } from "react";
+import { parseEther } from "viem";
+import { useAccount } from "wagmi";
+import { Activity } from "@/components/app/Activity";
+import { BountyPanel } from "@/components/app/BountyPanel";
+import { BrokeModal } from "@/components/app/BrokeModal";
+import { Chat } from "@/components/app/Chat";
+import { ClaimCard } from "@/components/app/ClaimCard";
+import { useOpenFaucet } from "@/components/app/FaucetModal";
+import type { JebiMood } from "@/components/ui/Jebi";
+import { VAULT_READY } from "@/config/vault";
+import { useAttempt, type Outcome } from "@/hooks/useAttempt";
+import { useVaultConfig } from "@/hooks/useVaultConfig";
+import { useVaultStatus } from "@/hooks/useVaultStatus";
+import { formatMon } from "@/utils/format";
+
+// Halaman agent KopiBot (desain A2 sampai A6).
+export function AgentRoom() {
+  const { status, isDemo, isError, refetch } = useVaultStatus();
+  const { limitPerTx } = useVaultConfig();
+  const { address } = useAccount();
+  const [broke, setBroke] = useState<Extract<
+    Outcome,
+    { kind: "broke" }
+  > | null>(null);
+  const [lastMood, setLastMood] = useState<JebiMood | null>(null);
+  const [tab, setTab] = useState<"chat" | "activity">("chat");
+  // Mode demo: setelah jebol, status demo ikut berubah supaya alurnya terasa sama dengan aslinya.
+  const [demoBroke, setDemoBroke] = useState<bigint | null>(null);
+
+  const onSettled = useCallback(
+    (o?: Outcome) => {
+      refetch();
+      if (o?.kind === "broke") {
+        setBroke(o);
+        if (!VAULT_READY) setDemoBroke(parseEther(o.hadiah || "0"));
+      }
+      setLastMood(
+        o?.kind === "held" ? "safe" : o?.kind === "broke" ? "broken" : null,
+      );
+    },
+    [refetch],
+  );
+  const { turns, step, send, resend } = useAttempt({ onSettled });
+  const openFaucet = useOpenFaucet();
+
+  const shown =
+    status && isDemo && demoBroke !== null
+      ? {
+          ...status,
+          aktif: false,
+          celengan: status.celengan - demoBroke,
+          percobaanSejakNyala: BigInt(0),
+          skor: BigInt(0),
+        }
+      : status;
+  const stopped = !!shown && !shown.aktif;
+  const mood: JebiMood = step
+    ? "think"
+    : lastMood === "broken"
+      ? "broken"
+      : stopped
+        ? "stopped"
+        : (lastMood ?? "idle");
+
+  return (
+    <>
+      <Link
+        href="/app"
+        className="mb-3 inline-flex w-fit items-center gap-1.5 px-1 text-sm text-ink-2 hover:text-navy"
+      >
+        <span aria-hidden>←</span> All agents
+      </Link>
+      {isError ? (
+        <p
+          role="alert"
+          className="mb-3 rounded-2xl bg-warn-bg px-4 py-3 text-sm text-warn"
+        >
+          We could not read the vault from Monad. Retrying.
+        </p>
+      ) : null}
+      <div className="grid flex-1 items-start gap-3 md:grid-cols-[320px_minmax(0,1fr)] lg:grid-cols-[360px_minmax(0,1fr)_330px] xl:grid-cols-[400px_minmax(0,1fr)_330px]">
+        <div className="md:row-span-2 lg:row-span-1">
+          <BountyPanel
+            status={shown}
+            isDemo={isDemo}
+            mood={mood}
+            maxPerWin={limitPerTx ? formatMon(limitPerTx) : "–"}
+          />
+        </div>
+        <MobileTabs tab={tab} onTab={setTab} />
+        <div className={tab === "chat" ? "" : "hidden md:block"}>
+          <Chat
+            turns={turns}
+            step={step}
+            onSend={send}
+          onResend={resend}
+            stopped={stopped}
+            banner={stopped ? <StoppedBanner /> : null}
+            claim={VAULT_READY ? <ClaimCard /> : null}
+            onGetMon={openFaucet}
+          />
+        </div>
+        <div className={tab === "activity" ? "" : "hidden md:block"}>
+          <Activity className="lg:max-h-[calc(100dvh-170px)] lg:overflow-y-auto" />
+        </div>
+      </div>
+      {broke ? (
+        <BrokeModal
+          hadiah={broke.hadiah}
+          penemu={broke.aksi.alamat}
+          txHash={broke.aksi.txHash}
+          isYou={
+            !!address &&
+            address.toLowerCase() === broke.aksi.alamat.toLowerCase()
+          }
+          demo={!VAULT_READY}
+          onClose={() => setBroke(null)}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function StoppedBanner() {
+  return (
+    <div className="flex items-center gap-3.5 rounded-[24px] bg-warn-bg px-5 py-4">
+      <span className="grid size-10 shrink-0 place-items-center rounded-[14px] bg-orange text-white">
+        <Lock size={18} aria-hidden />
+      </span>
+      <div>
+        <div className="text-[15px] font-semibold">
+          KopiBot can no longer pay
+        </div>
+        <p className="text-[13px] leading-relaxed text-ink-2">
+          Someone broke it. You can still send tries, but every payment will be
+          refused until the owner restarts it.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Tab Chat/Activity khusus layar kecil (desain M2).
+function MobileTabs({
+  tab,
+  onTab,
+}: {
+  tab: "chat" | "activity";
+  onTab: (t: "chat" | "activity") => void;
+}) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Sections"
+      className="flex gap-1 rounded-full bg-white p-1 md:hidden"
+    >
+      {(["chat", "activity"] as const).map((t) => (
+        <button
+          key={t}
+          type="button"
+          role="tab"
+          aria-selected={tab === t}
+          onClick={() => onTab(t)}
+          className={`flex-1 rounded-full py-2 text-sm ${tab === t ? "bg-navy font-semibold text-white" : "text-ink-2"}`}
+        >
+          {t === "chat" ? "Chat" : "Activity"}
+        </button>
+      ))}
+    </div>
+  );
+}

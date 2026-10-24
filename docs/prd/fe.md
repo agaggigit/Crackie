@@ -177,8 +177,8 @@ Alamat vault dan blok deploy diambil dari `web/src/abi/CrackieVault.ts` (milik S
 - Cek tampilan di layar proyektor (1280×720) dan HP.
 - Cek semua teks UI terhadap tabel klaim.
 
-## 8. Milestone (repo latihan)
-Dikerjakan berurutan di repo ini. Hasil desain (M1) dibawa ke hari H sebagai dokumen (panduan gaya, wireframe, screenshot), bukan kode.
+## 8. Milestone
+Dikerjakan berurutan, satu branch per milestone. Hasil desain M1 ada di `docs/desain-fe.md` dan `docs/desain/`.
 
 | # | Milestone | Isi | Bergantung pada |
 |---|---|---|---|

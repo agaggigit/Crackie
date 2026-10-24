@@ -8,7 +8,7 @@ Panduan untuk AI agent (Claude Code dan sejenisnya) yang bekerja di repo ini. Be
 ## Sumber kebenaran
 1. `docs/plan.md`: rencana final. Kalau ada yang bertentangan, yang berlaku dokumen ini.
 2. `docs/prd/sc.md`, `docs/prd/be.md`, `docs/prd/fe.md`: detail per bagian (sudah disetujui).
-3. `docs/prd/be-pelajaran.md`: jebakan dan urutan kerja BE dari latihan. **Wajib dibaca sebelum mengerjakan BE.**
+3. `docs/prd/be-pelajaran.md`: jebakan dan urutan kerja BE yang sudah teruji. **Wajib dibaca sebelum mengerjakan BE.**
 4. `docs/alur-kerja.md`: cara kerja tim (branch, PR, review).
 
 Baca `docs/plan.md` dan PRD bagian terkait sebelum mengerjakan apa pun.

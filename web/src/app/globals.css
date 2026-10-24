@@ -1,26 +1,103 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Token desain: docs/desain-fe.md Bagian 2. Light mode saja. */
+@theme {
+  --color-navy: #0e1b3d;
+  --color-orange: #ff6a1f;
+  --color-tangerine: #ff8f4d;
+  --color-ember: #e24e0a;
+  --color-peach: #ffc9a0;
+  --color-cream: #fff1e6;
+  --color-bg: #f4f2ee;
+  --color-field: #f6f2ec;
+  --color-ink-2: #5e6683;
+  --color-ink-3: #9a97a3;
+  --color-line: #eee9e1;
+  --color-ok-bg: #ddfbe9;
+  --color-ok: #0b7a45;
+  --color-warn-bg: #ffe6da;
+  --color-warn: #b4471a;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-head: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-chip: 8px;
+  --radius-card: 32px;
+  --radius-hero: 44px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-bg);
+  color: var(--color-navy);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Angka besar: desimal dibuat pudar. */
+.num-dim {
+  opacity: 0.45;
+}
+
+@keyframes jebi-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes jebi-shake {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-4deg) scale(1.03);
+  }
+  40% {
+    transform: rotate(4deg) scale(1.03);
+  }
+  60% {
+    transform: rotate(-2deg);
+  }
+  80% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-bob {
+  animation: jebi-bob 4s ease-in-out infinite;
+}
+
+.anim-shake {
+  animation: jebi-shake 0.9s ease-in-out 2;
+}
+
+.anim-pop {
+  animation: pop-in 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-bob,
+  .anim-shake,
+  .anim-pop {
+    animation: none;
+  }
 }

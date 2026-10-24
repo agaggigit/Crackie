@@ -61,4 +61,4 @@ Setiap PR ke `main` wajib:
 - Hapus branch setelah merge.
 
 ## Catatan hari H
-Repo ini untuk latihan dan membangun produk sampai jadi. **Hari Sabtu kita mulai dari repo baru yang kosong**, karena pre-building dilarang panitia. Alur kerja yang sama dipakai di repo hari H, tapi lebih ringan: PRD sudah ada, jadi review cukup cepat (AI review + satu anggota, maksimal 10 menit).
+Saat hari H, alur kerja ini dipakai dalam versi ringan: PRD sudah ada, jadi review cukup cepat (AI review + satu anggota, maksimal 10 menit).

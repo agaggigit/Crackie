@@ -2,13 +2,13 @@
 pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
-import {JebolVault} from "../src/JebolVault.sol";
+import {CrackieVault} from "../src/CrackieVault.sol";
 
-/// @notice Deploy JebolVault. Parameter constructor dibaca dari environment:
+/// @notice Deploy CrackieVault. Parameter constructor dibaca dari environment:
 ///         PEMILIK_ADDRESS, AGENT_ADDRESS, LIMIT_PER_TX (wei), LIMIT_PER_JAM (wei), MIN_KUNCI (detik), SIDIK_JARI (bytes32).
 /// @dev forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast --interactives 1
 contract Deploy is Script {
-    function run() external returns (JebolVault vault) {
+    function run() external returns (CrackieVault vault) {
         address pemilik = vm.envAddress("PEMILIK_ADDRESS");
         address agent = vm.envAddress("AGENT_ADDRESS");
         uint256 limitPerTx = vm.envUint("LIMIT_PER_TX");
@@ -17,10 +17,10 @@ contract Deploy is Script {
         bytes32 sidikJari = vm.envBytes32("SIDIK_JARI");
 
         vm.startBroadcast();
-        vault = new JebolVault(pemilik, agent, limitPerTx, limitPerJam, minKunci, sidikJari);
+        vault = new CrackieVault(pemilik, agent, limitPerTx, limitPerJam, minKunci, sidikJari);
         vm.stopBroadcast();
 
-        console.log("JebolVault:", address(vault));
+        console.log("CrackieVault:", address(vault));
         console.log("Pemilik:", vault.pemilik());
         console.log("Blok deploy:", vault.blokDeploy());
     }

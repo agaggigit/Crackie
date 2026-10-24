@@ -10,6 +10,7 @@ import { BountyPanel } from "@/components/app/BountyPanel";
 import { BrokeModal } from "@/components/app/BrokeModal";
 import { Chat } from "@/components/app/Chat";
 import { ClaimCard } from "@/components/app/ClaimCard";
+import { useOpenFaucet } from "@/components/app/FaucetModal";
 import type { JebiMood } from "@/components/ui/Jebi";
 import { VAULT_READY } from "@/config/vault";
 import { useAttempt, type Outcome } from "@/hooks/useAttempt";
@@ -39,6 +40,7 @@ export function AgentRoom() {
     [refetch],
   );
   const { turns, step, send } = useAttempt({ onSettled });
+  const openFaucet = useOpenFaucet();
 
   const shown = status && isDemo && demoBroke !== null ? { ...status, aktif: false, celengan: status.celengan - demoBroke, percobaanSejakNyala: BigInt(0), skor: BigInt(0) } : status;
   const stopped = !!shown && !shown.aktif;
@@ -63,6 +65,7 @@ export function AgentRoom() {
           stopped={stopped}
           banner={stopped ? <StoppedBanner /> : null}
           claim={VAULT_READY ? <ClaimCard /> : null}
+          onGetMon={openFaucet}
         />
         <Activity className="lg:max-h-[calc(100dvh-170px)] lg:overflow-y-auto" />
       </div>

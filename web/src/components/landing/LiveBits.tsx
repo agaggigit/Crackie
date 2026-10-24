@@ -20,7 +20,11 @@ export function LandingBounty() {
       </span>
       <Amount wei={status.celengan} className="text-[40px] leading-none" unitClassName="text-ink-2 text-sm" />
       <span className="text-[13px] text-ink-2">
-        {status.aktif ? `Held out for ${now ? formatDuration(now - Number(status.bertahanSejak)) : "a while"}` : "Broken. Waiting for a restart."}
+        {status.aktif
+          ? now && status.bertahanSejak > BigInt(0)
+            ? `Held out for ${formatDuration(now - Number(status.bertahanSejak))}`
+            : "Holding out"
+          : "Broken. Waiting for a restart."}
       </span>
     </div>
   );

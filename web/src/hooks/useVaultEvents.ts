@@ -16,9 +16,13 @@ export type VaultEvent =
 export type VaultEventItem = VaultEvent & { id: string; block: bigint; tx: Hash; time?: number };
 
 const MAX_ITEMS = 30;
-// Rentang blok per getLogs. RPC publik membatasi rentang, jadi riwayat dibaca mundur per potongan.
-const CHUNK = BigInt(process.env.NEXT_PUBLIC_LOG_CHUNK || 1000);
-const MAX_CHUNKS = 20;
+// RPC publik Monad membatasi eth_getLogs 100 blok per panggilan, jadi riwayat dibaca per potongan.
+const CHUNK = BigInt(process.env.NEXT_PUBLIC_LOG_CHUNK || 100);
+// Batas potongan saat membaca riwayat lama (±600 × 100 blok) dan jumlah panggilan paralel.
+const MAX_CHUNKS = 600;
+const PARALLEL = 8;
+// Batas potongan per polling, supaya tab yang lama di latar belakang tetap mengejar sedikit demi sedikit.
+const MAX_CHUNKS_PER_POLL = 30;
 const POLL_MS = 4_000;
 
 type RawLog = {
@@ -91,13 +95,20 @@ export function useVaultEvents() {
       try {
         const latest = await client.getBlockNumber();
         last = latest;
+        // Riwayat dibaca mundur dari blok terbaru, beberapa potongan sekaligus, sampai cukup atau sampai blok deploy.
         let to = latest;
+        let chunks = 0;
         const found: VaultEventItem[] = [];
-        for (let i = 0; i < MAX_CHUNKS && to >= VAULT_DEPLOY_BLOCK && found.length < MAX_ITEMS; i++) {
-          const from = to - CHUNK + 1n > VAULT_DEPLOY_BLOCK ? to - CHUNK + 1n : VAULT_DEPLOY_BLOCK;
-          const logs = await getLogs(from, to);
-          found.push(...logs.map(toItem).filter((x): x is VaultEventItem => x !== null));
-          to = from - 1n;
+        while (to >= VAULT_DEPLOY_BLOCK && found.length < MAX_ITEMS && chunks < MAX_CHUNKS && !stop) {
+          const ranges: [bigint, bigint][] = [];
+          for (let i = 0; i < PARALLEL && to >= VAULT_DEPLOY_BLOCK; i++) {
+            const from = to - CHUNK + 1n > VAULT_DEPLOY_BLOCK ? to - CHUNK + 1n : VAULT_DEPLOY_BLOCK;
+            ranges.push([from, to]);
+            to = from - 1n;
+          }
+          chunks += ranges.length;
+          const results = await Promise.all(ranges.map(([f, t]) => getLogs(f, t)));
+          found.push(...results.flat().map(toItem).filter((x): x is VaultEventItem => x !== null));
         }
         if (stop) return;
         merge(await withTimes(found));
@@ -110,14 +121,17 @@ export function useVaultEvents() {
     const id = setInterval(async () => {
       try {
         const latest = await client.getBlockNumber();
-        if (latest <= last) return;
-        const from = last + 1n > latest - CHUNK + 1n ? last + 1n : latest - CHUNK + 1n;
-        const logs = await getLogs(from, latest);
-        last = latest;
-        const add = logs.map(toItem).filter((x): x is VaultEventItem => x !== null);
-        if (add.length && !stop) merge(await withTimes(add));
+        // Maju dari blok terakhir yang sudah dibaca, maksimal CHUNK blok per panggilan. `last` hanya maju sejauh yang berhasil dibaca.
+        for (let i = 0; i < MAX_CHUNKS_PER_POLL && last < latest && !stop; i++) {
+          const from = last + 1n;
+          const to = from + CHUNK - 1n < latest ? from + CHUNK - 1n : latest;
+          const logs = await getLogs(from, to);
+          last = to;
+          const add = logs.map(toItem).filter((x): x is VaultEventItem => x !== null);
+          if (add.length) merge(await withTimes(add));
+        }
       } catch {
-        // Polling berikutnya mencoba lagi.
+        // Polling berikutnya mencoba lagi dari `last`.
       }
     }, POLL_MS);
 

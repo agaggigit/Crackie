@@ -1,3 +1,3 @@
-// Stub for optional x402 deps of @coinbase/cdp-sdk (pulled in by the Base Account
-// wallet connector). Jebol does not use x402. CommonJS so named imports resolve to undefined.
+// Pengganti dependensi opsional x402 milik @coinbase/cdp-sdk (ikut lewat konektor wallet Base Account).
+// Jebol tidak memakai x402. Format CommonJS supaya import bernama terbaca sebagai undefined.
 module.exports = {};

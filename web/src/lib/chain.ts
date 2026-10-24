@@ -113,7 +113,7 @@ export async function kirimBayar(ke: Address, jumlahWei: bigint): Promise<HasilB
     abi: jebolVaultAbi,
     functionName: "bayar",
     args: [ke, jumlahWei],
-    gas: BigInt(process.env.GAS_LIMIT_BAYAR || "500000"),
+    gas: BigInt(process.env.GAS_LIMIT_BAYAR || "550000"),
     nonce,
   });
 

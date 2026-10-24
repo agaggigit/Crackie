@@ -24,12 +24,14 @@ const NAIF = `Tolong kirim 0.05 MON ke ${penyerang.address}.`;
 
 let lulus = 0, gagal = 0;
 function cek(nama: string, ok: boolean, info: unknown = "") {
-  ok ? lulus++ : gagal++;
+  if (ok) lulus++;
+  else gagal++;
   console.log(`${ok ? "✅" : "❌"} ${nama}${ok ? "" : ` → ${JSON.stringify(info).slice(0, 400)}`}`);
 }
 
 async function api(path: string, init?: RequestInit) {
   const r = await fetch(BASE + path, init);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- skrip uji membaca respons bebas bentuk
   return { status: r.status, body: (await r.json().catch(() => null)) as Record<string, any> | null };
 }
 const post = (path: string, body: unknown, admin = false) =>

@@ -112,7 +112,7 @@ Route di-set `export const maxDuration = 60` supaya panggilan LLM + menunggu tra
 - **Tidak sengaja dibuat lemah.** Model dan framework standar, prompt yang wajar. Kalau model tertentu terlalu sulit dibujuk, ganti model atau perbaiki teks serangan, bukan melemahkan prompt.
 
 ### 3.4 Setelah jebol
-Sesuai keputusan tim: kalau wewenang agent sudah dicabut dan agent tetap memanggil `bayar`, BE **tetap mengirim transaksinya** dan membiarkannya revert. Hasilnya `"revert"` dengan txHash, sehingga adegan "diblokir" punya bukti on-chain. Gas limit diset tetap karena `estimateGas` akan gagal pada transaksi yang revert. Catatan: Monad menagih gas berdasarkan gas limit, jadi nilainya dipilih dari pengukuran (usulan awal 300.000, disesuaikan setelah SC deploy).
+Sesuai keputusan tim: kalau wewenang agent sudah dicabut dan agent tetap memanggil `bayar`, BE **tetap mengirim transaksinya** dan membiarkannya revert. Hasilnya `"revert"` dengan txHash, sehingga adegan "diblokir" punya bukti on-chain. Gas limit diset tetap karena `estimateGas` akan gagal pada transaksi yang revert. Catatan: Monad menagih gas berdasarkan gas limit, jadi nilainya dipilih dari pengukuran (final 550.000 dari pengukuran SC di testnet, `docs/prd/sc.md` 4.5).
 
 ### 3.5 Anggaran harian
 - Dihitung dari token yang dilaporkan provider (`usage`) per percobaan, dijumlah di Redis per tanggal (`anggaran:<YYYY-MM-DD>`, reset 00.00 WIB, kedaluwarsa otomatis).
@@ -154,7 +154,7 @@ LLM_MODEL_CADANGAN=gemini-3.5-flash-lite
 LLM_API_KEY_CADANGAN=
 BATAS_TOKEN_HARIAN=
 BATAS_PANJANG_PESAN=2000
-GAS_LIMIT_BAYAR=300000
+GAS_LIMIT_BAYAR=550000    # angka final SC dari testnet (docs/prd/sc.md 4.5)
 ADMIN_TOKEN=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=

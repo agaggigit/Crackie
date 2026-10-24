@@ -32,13 +32,13 @@ export function BountyPanel({
 
   return (
     <section aria-label="KopiBot bounty" className="flex flex-col gap-3">
-      <div className="relative h-[230px] overflow-hidden rounded-[30px] bg-navy text-white sm:h-[300px] lg:h-[520px] lg:rounded-[36px]">
+      <div className="relative h-[262px] overflow-hidden rounded-[30px] bg-navy text-white sm:h-[260px] md:h-[480px] md:rounded-[36px] lg:h-[520px]">
         <Melt variant="glow" />
         <Jebi
           mood={mood}
           size={420}
           priority
-          className={`absolute -bottom-6 -right-6 w-[62%] max-w-[420px] sm:w-[52%] lg:-bottom-24 lg:left-[20%] lg:right-auto lg:w-[92%] ${
+          className={`absolute -bottom-10 -right-8 w-[46%] max-w-[260px] sm:w-[40%] md:-bottom-20 md:left-[18%] md:right-auto md:w-[92%] md:max-w-[420px] lg:-bottom-24 lg:left-[20%] ${
             mood === "broken" ? "anim-shake" : "anim-bob"
           }`}
         />
@@ -54,18 +54,18 @@ export function BountyPanel({
             </div>
             {status ? <Chip tone={status.aktif ? "ok" : "warn"}>{status.aktif ? "Active" : "Stopped"}</Chip> : null}
           </div>
-          <div className="mt-1 lg:mt-4">
+          <div className="mt-1 md:mt-4">
             <div className="flex items-center gap-2 text-sm text-white/60">
               Bounty {isDemo ? <DemoBadge className="h-6 text-xs" /> : null}
             </div>
             {status ? (
-              <Amount wei={status.celengan} className="text-[52px] leading-none sm:text-[68px] lg:text-[76px]" />
+              <Amount wei={status.celengan} className="text-[52px] leading-none sm:text-[60px] md:text-[64px] xl:text-[76px]" />
             ) : (
               <div className="mt-2 h-16 w-44 animate-pulse rounded-2xl bg-white/10" />
             )}
           </div>
           {status ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex max-w-[62%] flex-wrap gap-2 md:max-w-none">
               <Chip tone="glass">Up to {maxPerWin} per win</Chip>
               <Chip tone="glass">{lockLabel(status, now)}</Chip>
             </div>
@@ -89,7 +89,7 @@ function StatBox({ label, value, hint }: { label: string; value: string; hint?: 
   return (
     <div className="flex flex-col-reverse rounded-[22px] bg-white p-4" title={hint}>
       <dt className="text-[13px] text-ink-2">{label}</dt>
-      <dd className="font-head text-lg font-semibold tracking-[-0.02em] tabular-nums sm:text-xl">{value}</dd>
+      <dd className="whitespace-nowrap font-head text-base font-semibold tracking-[-0.02em] tabular-nums sm:text-xl md:text-base lg:text-xl">{value}</dd>
     </div>
   );
 }

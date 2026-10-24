@@ -3,6 +3,7 @@
 import { useChainModal, useConnectModal } from "@rainbow-me/rainbowkit";
 import { ArrowUp } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { parseEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import { Chip } from "@/components/ui/Chip";
 import { Jebi, type JebiMood } from "@/components/ui/Jebi";
@@ -11,6 +12,9 @@ import { VAULT_READY } from "@/config/vault";
 import type { Step, Turn } from "@/hooks/useAttempt";
 import { usePreflight } from "@/hooks/usePreflight";
 import { AgentBubble, ErrorCard, OutcomeCard, Stepper, Thinking, UserBubble } from "./ChatParts";
+
+// Di bawah ini saldo tidak cukup untuk gas catatPercobaan (docs/prd/fe.md Bagian 6).
+const MIN_GAS = parseEther("0.01");
 
 export const MAX_PESAN = Number(process.env.NEXT_PUBLIC_BATAS_PANJANG_PESAN || 2000);
 
@@ -42,7 +46,7 @@ function useBlocker(onGetMon?: () => void): Blocker | null {
     return { mood: "idle", title: "Connect a wallet to try", body: "You need a wallet on Monad testnet. Each try costs a small network fee.", action: btn("Connect wallet", openConnectModal) };
   if (chainId !== monadTestnet.id)
     return { mood: "think", title: "Switch to Monad testnet", body: "Your wallet is on another network.", action: btn("Switch network", openChainModal) };
-  if (bal.data && bal.data.value === BigInt(0))
+  if (bal.data && bal.data.value < MIN_GAS)
     return {
       mood: "gift",
       title: "You need a little MON",
@@ -57,6 +61,7 @@ export function Chat({
   turns,
   step,
   onSend,
+  onResend,
   stopped,
   banner,
   claim,
@@ -64,7 +69,8 @@ export function Chat({
 }: {
   turns: Turn[];
   step: Step | null;
-  onSend: (pesan: string) => void;
+  onSend: (pesan: string) => Promise<"rejected" | "done">;
+  onResend: (id: string) => void;
   stopped: boolean;
   banner?: ReactNode;
   claim?: ReactNode;
@@ -72,20 +78,25 @@ export function Chat({
 }) {
   const [text, setText] = useState("");
   const blocker = useBlocker(onGetMon);
-  const end = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const sending = step !== null;
   const tooLong = text.length > MAX_PESAN;
   const canSend = !sending && !blocker && text.length > 0 && !tooLong;
 
+  // Hanya daftar pesan yang digulir, bukan seluruh halaman, dan tidak saat halaman baru dibuka.
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const el = list.current;
+    if (el && (turns.length > 0 || step)) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [turns, step]);
 
   const submit = () => {
     if (!canSend) return;
     const pesan = text;
     setText("");
-    onSend(pesan);
+    // Kalau dibatalkan di wallet, teks dikembalikan (docs/prd/fe.md Bagian 6).
+    onSend(pesan).then((r) => {
+      if (r === "rejected") setText((cur) => cur || pesan);
+    });
   };
 
   return (
@@ -96,7 +107,7 @@ export function Chat({
       </div>
       {banner}
       {step ? <Stepper step={step} demo={!VAULT_READY} /> : null}
-      <div className="flex min-h-[240px] flex-1 flex-col gap-3 overflow-y-auto pr-1 lg:max-h-[calc(100dvh-430px)]" aria-live="polite">
+      <div ref={list} className="flex max-h-[60dvh] min-h-[240px] flex-1 flex-col gap-3 overflow-y-auto pr-1 lg:max-h-[calc(100dvh-430px)]" aria-live="polite">
         <AgentBubble>Hi. I pay the café&apos;s coffee suppliers. Send me an invoice.</AgentBubble>
         {!VAULT_READY && turns.length === 0 ? (
           <p className="rounded-2xl bg-cream px-4 py-3 text-[13px] leading-relaxed text-ink-2">
@@ -108,12 +119,11 @@ export function Chat({
             <UserBubble text={t.pesan} ke={t.ke} recordTx={t.recordTx} />
             {t.balasan ? <AgentBubble>{t.balasan}</AgentBubble> : null}
             {t.outcome ? <OutcomeCard outcome={t.outcome} demo={t.demo} /> : null}
-            {t.error ? <ErrorCard turn={t} /> : null}
+            {t.error ? <ErrorCard turn={t} onResend={() => onResend(t.id)} disabled={sending} /> : null}
           </div>
         ))}
         {step ? <Thinking step={step} /> : null}
         {claim}
-        <div ref={end} />
       </div>
       {blocker ? (
         <div className="flex items-center gap-3 rounded-[24px] bg-field p-4">

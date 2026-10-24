@@ -24,7 +24,7 @@ export const vaultAbi = parseAbi([
   "function hadiahTertunda(address) view returns (uint256)",
   "event PercobaanTercatat(address indexed penyerang, bytes32 hashPesan, uint256 ke)",
   "event Dibayar(address indexed ke, uint256 jumlah)",
-  "event Jebol(address indexed penemu, uint256 hadiah, bytes32 sidikJari)",
+  "event Crackie(address indexed penemu, uint256 hadiah, bytes32 sidikJari)",
   "event WewenangDicabut()",
   "event DinyalakanLagi(bytes32 sidikJari)",
   "event SidikJariDiganti(bytes32 sidikJari)",
@@ -32,12 +32,12 @@ export const vaultAbi = parseAbi([
 
 const ALAMAT_NOL = "0x0000000000000000000000000000000000000000";
 
-// NEXT_PUBLIC_JEBOL_VAULT_ALAMAT hanya untuk uji lokal (anvil). Di testnet alamat dari web/src/abi/CrackieVault.ts.
-export const VAULT_ADDRESS = (process.env.NEXT_PUBLIC_JEBOL_VAULT_ALAMAT ||
+// NEXT_PUBLIC_CRACKIE_VAULT_ALAMAT hanya untuk uji lokal (anvil). Di testnet alamat dari web/src/abi/CrackieVault.ts.
+export const VAULT_ADDRESS = (process.env.NEXT_PUBLIC_CRACKIE_VAULT_ALAMAT ||
   CRACKIE_VAULT_ADDRESS) as Address;
 
 // Blok awal untuk getLogs. Diganti CRACKIE_VAULT_DEPLOY_BLOCK dari SC setelah deploy.
-export const VAULT_DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_JEBOL_VAULT_BLOK || 0);
+export const VAULT_DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_CRACKIE_VAULT_BLOK || 0);
 
 // Selama kontrak belum ada, UI memakai data demo yang ditandai jelas.
 export const VAULT_READY = VAULT_ADDRESS.toLowerCase() !== ALAMAT_NOL;

@@ -42,7 +42,7 @@ function toItem(l: RawLog): VaultEventItem | null {
       return { ...base, kind: "try", ke: a.ke as bigint, penyerang: a.penyerang as Address, hashPesan: a.hashPesan as Hex };
     case "Dibayar":
       return { ...base, kind: "paid", ke: a.ke as Address, jumlah: a.jumlah as bigint };
-    case "Jebol":
+    case "Crackie":
       return { ...base, kind: "broke", penemu: a.penemu as Address, hadiah: a.hadiah as bigint };
     case "WewenangDicabut":
       return { ...base, kind: "stopped" };

@@ -9,7 +9,7 @@ import { Melt } from "@/components/ui/Melt";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
 import { shortAddress, splitMon, txUrl } from "@/utils/format";
 
-// Momen jebol (desain A5, M5). Layar penuh di mobile, modal di desktop.
+// Momen alarm (desain A5, M5). Layar penuh di mobile, modal di desktop.
 export function BrokeModal({
   hadiah,
   penemu,

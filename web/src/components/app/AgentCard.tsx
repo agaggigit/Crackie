@@ -68,7 +68,7 @@ export function YourAgentCard() {
     <article className="relative flex min-h-[420px] flex-col overflow-hidden rounded-[36px] bg-white p-7 lg:min-h-[520px]">
       <h3 className="font-head text-[30px] font-semibold tracking-[-0.035em]">Your agent here</h3>
       <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-ink-2">
-        Add Jebol to an agent that holds money. Jebi will guard its bounty.
+        Add Crackie to an agent that holds money. Jebi will guard its bounty.
       </p>
       <Link
         href="/#builders"

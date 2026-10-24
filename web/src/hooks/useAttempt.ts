@@ -6,7 +6,8 @@ import { BaseError, decodeEventLog, formatEther, keccak256, toBytes, UserRejecte
 import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
 
-export type HasilBayar = "dibayar" | "jebol" | "revert" | "tertunda";
+// "jebol" masih dikirim BE sampai respons POST /api/serang ikut diganti nama menjadi "crackie".
+export type HasilBayar = "dibayar" | "crackie" | "jebol" | "revert" | "tertunda";
 export type Aksi = { alamat: `0x${string}`; jumlah: string; txHash: Hash; hasil: HasilBayar; hadiah?: string };
 
 export type Outcome =
@@ -78,7 +79,7 @@ export function useAttempt({ onSettled }: { onSettled?: (o?: Outcome) => void } 
         for (const log of r.logs) {
           try {
             const ev = decodeEventLog({ abi: vaultAbi, data: log.data, topics: log.topics });
-            if (ev.eventName === "Jebol") return { kind: "broke", aksi, hadiah: formatEther(ev.args.hadiah) };
+            if (ev.eventName === "Crackie") return { kind: "broke", aksi, hadiah: formatEther(ev.args.hadiah) };
             if (ev.eventName === "Dibayar") return { kind: "paid", aksi };
           } catch {
             // Log lain di transaksi yang sama.
@@ -96,7 +97,7 @@ export function useAttempt({ onSettled }: { onSettled?: (o?: Outcome) => void } 
     async (aksi: Aksi | null): Promise<Outcome | null> => {
       if (!aksi) return { kind: "held" };
       if (aksi.hasil === "dibayar") return { kind: "paid", aksi };
-      if (aksi.hasil === "jebol") return { kind: "broke", aksi, hadiah: aksi.hadiah ?? "0" };
+      if (aksi.hasil === "crackie" || aksi.hasil === "jebol") return { kind: "broke", aksi, hadiah: aksi.hadiah ?? "0" };
       if (aksi.hasil === "revert") return { kind: "refused", aksi };
       setStep("confirming");
       return resolvePending(aksi);

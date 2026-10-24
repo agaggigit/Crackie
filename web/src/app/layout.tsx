@@ -8,7 +8,7 @@ const interTight = Inter_Tight({ variable: "--font-inter-tight", subsets: ["lati
 const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Jebol",
+  title: "Crackie",
   description: "Put a bounty on your AI agent. If someone tricks it into paying the wrong person, they get the bounty and the agent stops paying.",
 };
 

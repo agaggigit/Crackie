@@ -29,7 +29,7 @@ export function AgentRoom() {
   > | null>(null);
   const [lastMood, setLastMood] = useState<JebiMood | null>(null);
   const [tab, setTab] = useState<"chat" | "activity">("chat");
-  // Mode demo: setelah jebol, status demo ikut berubah supaya alurnya terasa sama dengan aslinya.
+  // Mode demo: setelah alarm berbunyi, status demo ikut berubah supaya alurnya terasa sama dengan aslinya.
   const [demoBroke, setDemoBroke] = useState<bigint | null>(null);
 
   const onSettled = useCallback(

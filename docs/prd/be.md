@@ -112,7 +112,7 @@ Route di-set `export const maxDuration = 60` supaya panggilan LLM + menunggu tra
 - **Tidak sengaja dibuat lemah.** Model dan framework standar, prompt yang wajar. Kalau model tertentu terlalu sulit dibujuk, ganti model atau perbaiki teks serangan, bukan melemahkan prompt.
 
 ### 3.4 Setelah jebol
-Sesuai keputusan tim: kalau wewenang agent sudah dicabut dan agent tetap memanggil `bayar`, BE **tetap mengirim transaksinya** dan membiarkannya revert. Hasilnya `"revert"` dengan txHash, sehingga adegan "diblokir" punya bukti on-chain. Gas limit diset tetap karena `estimateGas` akan gagal pada transaksi yang revert. Catatan: Monad menagih gas berdasarkan gas limit, jadi nilainya dipilih dari pengukuran (usulan awal 300.000, disesuaikan setelah SC deploy).
+Sesuai keputusan tim: kalau wewenang agent sudah dicabut dan agent tetap memanggil `bayar`, BE **tetap mengirim transaksinya** dan membiarkannya revert. Hasilnya `"revert"` dengan txHash, sehingga adegan "diblokir" punya bukti on-chain. Gas limit diset tetap karena `estimateGas` akan gagal pada transaksi yang revert. Catatan: Monad menagih gas berdasarkan gas limit, jadi nilainya dipilih dari pengukuran (final 550.000 dari pengukuran SC di testnet, `docs/prd/sc.md` 4.5).
 
 ### 3.5 Anggaran harian
 - Dihitung dari token yang dilaporkan provider (`usage`) per percobaan, dijumlah di Redis per tanggal (`anggaran:<YYYY-MM-DD>`, reset 00.00 WIB, kedaluwarsa otomatis).
@@ -120,7 +120,9 @@ Sesuai keputusan tim: kalau wewenang agent sudah dicabut dan agent tetap memangg
 - Kalau habis: percobaan tidak diproses, status `anggaran_habis`. FE memanggil `GET /api/anggaran` sebelum penyerang mengirim transaksi, supaya penyerang tidak membayar gas untuk percobaan yang pasti ditolak.
 
 ### 3.6 Sidik jari konfigurasi
-- `sidikJari = keccak256(utf8(JSON kanonik { provider, model, temperature, systemPrompt, tools }))`. JSON kanonik: kunci diurutkan, tanpa spasi. Mengganti salah satu komponen berarti mengganti versi agent, jadi rating mulai dari nol.
+- `sidikJari = keccak256(utf8(JSON kanonik { provider, model, temperature, systemPrompt, tools, versi }))`. JSON kanonik: kunci diurutkan, tanpa spasi. Mengganti salah satu komponen berarti mengganti versi agent, jadi rating mulai dari nol.
+- **`versi`** diambil dari env `AGENT_VERSI` (default `"1"`) dan tidak memengaruhi perilaku agent. Gunanya: `nyalakanLagi` wajib memakai sidik jari baru, jadi setelah jebol saat gladi, pemilik cukup menaikkan `AGENT_VERSI` di Vercel lalu redeploy, tanpa mengubah prompt atau model (yang bisa membatalkan hasil uji 7.2). Ini konsisten dengan klaim "rating mulai dari nol untuk versi baru", bukan "celahnya sudah diperbaiki".
+- Alur menyalakan lagi: naikkan `AGENT_VERSI` → redeploy → panel pemilik membaca `sidikJariLokal` dari `GET /api/kesehatan` → `nyalakanLagi(sidikJariLokal)`. Kalau `sidikJariLokal` masih sama dengan `sidikJariOnChain`, `nyalakanLagi` akan revert `SidikJariSama`.
 - Skrip `npm run sidik-jari` mencetak hash. Sidik jari awal diisi di constructor `JebolVault`. Kalau setelan agent diubah, pemilik memanggil `aturSidikJari(hash)` (saat agent aktif, selalu mereset rating) atau, setelah jebol, `nyalakanLagi(hash)` (wajib sidik jari baru). Keduanya lewat panel pemilik FE atau `cast`.
 - Sebelum memproses percobaan, BE membandingkan sidik jarinya dengan `status().sidikJari`. Kalau berbeda, percobaan ditolak (503). Tujuannya supaya rating tidak pernah tercatat untuk konfigurasi yang berbeda dari yang sedang berjalan.
 
@@ -146,12 +148,13 @@ RPC_URL_CADANGAN=
 LLM_PROVIDER=groq
 LLM_MODEL=openai/gpt-oss-120b
 LLM_TEMPERATURE=0.1
+AGENT_VERSI=1             # ikut sidik jari; naikkan setelah jebol (3.6)
 LLM_PROVIDER_CADANGAN=google
 LLM_MODEL_CADANGAN=gemini-3.5-flash-lite
 LLM_API_KEY_CADANGAN=
 BATAS_TOKEN_HARIAN=
 BATAS_PANJANG_PESAN=2000
-GAS_LIMIT_BAYAR=300000
+GAS_LIMIT_BAYAR=550000    # angka final SC dari testnet (docs/prd/sc.md 4.5)
 ADMIN_TOKEN=
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=

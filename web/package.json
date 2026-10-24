@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "sidik-jari": "tsx --env-file-if-exists=.env.local scripts/sidik-jari.ts",
-    "uji:model": "tsx --env-file-if-exists=.env.local scripts/uji-model.mts"
+    "uji:model": "tsx --env-file-if-exists=.env.local scripts/uji-model.mts",
+    "dev:anvil": "node scripts/dev-anvil.mjs",
+    "uji:e2e": "tsx --env-file-if-exists=.env.local scripts/uji-e2e.mts",
+    "anvil:bersih": "tsx --env-file-if-exists=.env.local scripts/anvil-bersih.mts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.104",

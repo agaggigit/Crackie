@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, ListChecks, MessageSquare, PiggyBank, Receipt, SlidersHorizontal, Wallet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { isAddress, isHex, parseEther, type Address, type Hex } from "viem";
 import { useAccount, usePublicClient, useReadContracts } from "wagmi";
@@ -307,17 +308,32 @@ function Suppliers({ locked }: { locked: boolean }) {
 }
 
 function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current?: Hex; locked: boolean; onDone: () => void }) {
-  const [v, setV] = useState("");
+  // null = belum diketik, jadi input memakai setup agent dari server.
+  const [typed, setTyped] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
+  // Sidik jari yang dipakai agent di BE (sidikJariLokal dari GET /api/kesehatan, ikut AGENT_VERSI).
+  // Diisi otomatis supaya pemilik tidak perlu menyalin hash.
+  const agent = useQuery({
+    queryKey: ["sidikJariAgent"],
+    queryFn: async () => {
+      const r = await fetch("/api/kesehatan", { cache: "no-store" }).catch(() => null);
+      const b = (await r?.json().catch(() => null)) as { sidikJariLokal?: string } | null;
+      return b?.sidikJariLokal ?? null;
+    },
+    enabled: VAULT_READY,
+    refetchInterval: 15_000,
+  });
+  const agentSetup = agent.data ?? null;
+  const v = typed ?? agentSetup ?? "";
   const w = useVaultWrite(onDone);
   const same = !!current && v.toLowerCase() === current.toLowerCase();
   const valid = isHex(v) && v.length === 66 && !same;
+  const agentMatches = !!agentSetup && !!current && agentSetup.toLowerCase() === current.toLowerCase();
   const loadFromAgent = async () => {
     setHint(null);
-    const r = await fetch("/api/kesehatan", { cache: "no-store" }).catch(() => null);
-    const b = (await r?.json().catch(() => null)) as { sidikJariLokal?: string } | null;
-    if (b?.sidikJariLokal) setV(b.sidikJariLokal);
-    else setHint("We could not read the agent setup from the server.");
+    setTyped(null);
+    const r = await agent.refetch();
+    if (!r.data) setHint("We could not read the agent setup from the server.");
   };
   return (
     <Card title={stopped ? "Restart KopiBot" : "Setup"} icon={<SlidersHorizontal size={16} aria-hidden />}>
@@ -337,7 +353,7 @@ function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current
       <label className="sr-only" htmlFor="setup-id">
         Setup ID
       </label>
-      <input id="setup-id" placeholder="Setup ID 0x" value={v} onChange={(e) => setV(e.target.value)} disabled={locked} className={`${fieldCls} font-mono text-xs`} />
+      <input id="setup-id" placeholder="Setup ID 0x" value={v} onChange={(e) => setTyped(e.target.value)} disabled={locked} className={`${fieldCls} font-mono text-xs`} />
       <div className="flex flex-wrap gap-2">
         {stopped ? (
           <ArrowButton
@@ -359,7 +375,18 @@ function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current
       </div>
       <WriteStatus state={w.state} />
       {hint ? <p className="text-[13px] font-semibold text-warn">{hint}</p> : null}
-      {same ? <p className="text-[13px] font-semibold text-warn">This is the current setup. Change the model or prompt first.</p> : null}
+      {agentSetup && current ? (
+        <p role="status" className={`text-[13px] font-semibold ${agentMatches === stopped ? "text-warn" : "text-ok"}`}>
+          {agentMatches
+            ? stopped
+              ? "The agent still has the current setup. Update the agent on the server first, then restart."
+              : "The agent setup matches Monad. Tries are open."
+            : stopped
+              ? "The agent has a new setup. You can restart KopiBot with it."
+              : "The agent setup is different from Monad. Tries are paused until you save it."}
+        </p>
+      ) : null}
+      {same && !agentMatches ? <p className="text-[13px] font-semibold text-warn">This is the current setup. Change the model or prompt first.</p> : null}
       <Note>
         {stopped
           ? "Change the model or prompt first. Restarting with the same setup is not allowed. The score starts from zero."

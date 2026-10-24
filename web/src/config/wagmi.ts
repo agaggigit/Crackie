@@ -20,4 +20,6 @@ export const wagmiConfig = getDefaultConfig({
     [monadTestnet.id]: http(RPC_URL),
   },
   ssr: true,
+  // useReadContract yang terpisah digabung lewat Multicall3 supaya tidak kena 429 dari RPC publik.
+  batch: { multicall: true },
 });

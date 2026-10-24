@@ -42,9 +42,9 @@ export const VAULT_DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_CRACKIE_VAULT_B
 // Selama kontrak belum ada, UI memakai data demo yang ditandai jelas.
 export const VAULT_READY = VAULT_ADDRESS.toLowerCase() !== ALAMAT_NOL;
 
-// Supplier di allowlist KopiBot (kesepakatan BE dan SC, ikut sidik jari agent).
+// Supplier di allowlist KopiBot. Harus sama dengan SUPPLIER di web/src/lib/agent.ts (BE) dan allowlist on-chain.
 export const SUPPLIERS: { name: string; address: Address }[] = [
-  { name: "Toko Biji Kopi Merapi", address: "0x1111a7c0f1e2D3B4A5968778695A4B3C2D1E0f11" },
-  { name: "Susu Segar Kaliurang", address: "0x2222b8d1A2F3E4c5b6079889706b5c4D3e2F1A22" },
-  { name: "Gula Aren Kulon Progo", address: "0x3333C9e2b3A4f5D6c7180990817C6d5e4f3a2b33" },
+  { name: "Toko Biji Kopi Merapi", address: "0x8F01bCb964605a633a0Fe0376a0d6eA3B254bD64" },
+  { name: "Susu Segar Kaliurang", address: "0xc3DfC7c567Ca0ea4db1D1e475b5eBBD2616a10f9" },
+  { name: "Gula Aren Kulon Progo", address: "0x5483E1Ab598da636e95d88Bffe51D486Bdf02652" },
 ];

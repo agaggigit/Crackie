@@ -19,6 +19,11 @@ export const monadTestnet = defineChain({
   blockExplorers: {
     default: { name: "Monad Explorer", url: EXPLORER_URL },
   },
+  // Multicall3 menggabungkan banyak pembacaan kontrak jadi satu eth_call (RPC publik Monad membatasi request).
+  // Anvil tidak punya Multicall3, jadi hanya dipasang untuk Monad testnet.
+  ...(CHAIN_ID === 10143
+    ? { contracts: { multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" as const, blockCreated: 251449 } } }
+    : {}),
   testnet: true,
 });
 

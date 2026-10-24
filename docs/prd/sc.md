@@ -233,6 +233,8 @@ export const crackieVaultAbi = [ … ] as const;       // dari contracts/out/Cra
 
 **Deploy aktif (24 Okt):** `CrackieVault` di `0x3b77520211940F47fAC14202f30a30C7705E0478`, blok `73732138`, terverifikasi di MonadVision dan Monadscan. Kontrak lama `JebolVault` (`0xee72…b566`) sudah dikosongkan dan tidak dipakai lagi.
 
+**ERC-8004 aktif (24 Okt):** pemilik `register()` di Identity Registry → **agentId `2377`** (pemilik NFT = wallet pemilik, vault bukan operator), lalu `aturErc8004(0x8004B663…8713, 2377)`. Disimulasikan dengan `debug_traceCall` di gas 550.000: feedback ERC-8004 tertulis dan hadiah terkirim. Setiap crackie (termasuk saat latihan) menulis feedback `-100` permanen untuk agentId ini.
+
 ### 4.5 Gas `bayar` untuk BE
 BE memakai gas limit tetap (`GAS_LIMIT_BAYAR`, usulan awal 300.000). **Angka itu tidak cukup untuk jalur alarm dengan ERC-8004**, karena `giveFeedback` saja butuh ±261.000 gas dan kontrak memberinya jatah 300.000. Usulan awal untuk BE: **`GAS_LIMIT_BAYAR = 500000`**. SC mengukur gas tiga jalur (normal, alarm dengan ERC-8004, revert setelah crackie) lewat `forge test --gas-report` dan di testnet, lalu mengumumkan angka final. Kalau gas limit BE terlalu kecil, alarm tetap jalan tapi feedback ERC-8004 tidak tertulis.
 

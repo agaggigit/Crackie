@@ -3,12 +3,13 @@
 import { BadgeCheck, ListChecks, MessageSquare, PiggyBank, Receipt, SlidersHorizontal, Wallet } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { isAddress, isHex, parseEther, type Address, type Hex } from "viem";
-import { useAccount, useReadContracts } from "wagmi";
+import { useAccount, usePublicClient, useReadContracts } from "wagmi";
 import { Amount } from "@/components/ui/Amount";
 import { ArrowButton } from "@/components/ui/Button";
 import { Chip, DemoBadge } from "@/components/ui/Chip";
 import { Jebi } from "@/components/ui/Jebi";
 import { Melt } from "@/components/ui/Melt";
+import { monadTestnet } from "@/config/chains";
 import { SUPPLIERS, VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
 import { useNow } from "@/hooks/useNow";
 import { useVaultConfig } from "@/hooks/useVaultConfig";
@@ -82,21 +83,23 @@ const toWei = (v: string) => {
 export function OwnerPanel() {
   const { status, isDemo, refetch } = useVaultStatus();
   const { pemilik, minKunci } = useVaultConfig();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const now = useNow();
   const isOwner = VAULT_READY && !!address && !!pemilik && address.toLowerCase() === pemilik.toLowerCase();
-  const locked = !isOwner;
+  const wrongChain = isOwner && chainId !== monadTestnet.id;
+  const locked = !isOwner || wrongChain;
   const stopped = !!status && !status.aktif;
 
   return (
     <>
-      <OwnerHero stopped={stopped} isDemo={isDemo} isOwner={isOwner} pemilik={pemilik} />
+      <OwnerHero stopped={stopped} isDemo={isDemo} isOwner={isOwner} wrongChain={wrongChain} pemilik={pemilik} />
       <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_1fr_400px]">
         <div className="flex flex-col gap-3">
           <MainFunds amount={status?.danaUtama} locked={locked} onDone={refetch} />
           <Bounty
             amount={status?.celengan}
             unlockAt={status ? Number(status.kunciSampai) : 0}
+            currentLock={status?.kunciSampai ?? BigInt(0)}
             stopped={stopped}
             now={now}
             minKunci={Number(minKunci ?? BigInt(300))}
@@ -109,7 +112,7 @@ export function OwnerPanel() {
           <AdminTools />
         </div>
         <div className="flex flex-col gap-3 md:col-span-2 md:grid md:grid-cols-2 xl:col-span-1 xl:flex">
-          <Setup stopped={stopped} locked={locked} onDone={refetch} />
+          <Setup stopped={stopped} current={status?.sidikJari} locked={locked} onDone={refetch} />
           <Reputation locked={locked} />
         </div>
       </div>
@@ -117,7 +120,7 @@ export function OwnerPanel() {
   );
 }
 
-function OwnerHero({ stopped, isDemo, isOwner, pemilik }: { stopped: boolean; isDemo: boolean; isOwner: boolean; pemilik?: Address }) {
+function OwnerHero({ stopped, isDemo, isOwner, wrongChain, pemilik }: { stopped: boolean; isDemo: boolean; isOwner: boolean; wrongChain: boolean; pemilik?: Address }) {
   return (
     <section className="relative mt-2 min-h-[220px] overflow-hidden rounded-[32px] bg-navy p-6 text-white sm:p-8 lg:rounded-[36px]">
       <Melt variant="glow" className="opacity-90" />
@@ -133,11 +136,13 @@ function OwnerHero({ stopped, isDemo, isOwner, pemilik }: { stopped: boolean; is
         <p className="text-[15px] leading-relaxed text-white/70 sm:text-base">
           {isDemo
             ? "The vault is not on Monad yet. Buttons turn on once it is deployed."
-            : !isOwner
+            : wrongChain
+              ? "Switch your wallet to Monad testnet to make changes."
+              : !isOwner
               ? `Only the owner wallet${pemilik ? ` ${shortAddress(pemilik)}` : ""} can change these. You can still look around.`
               : stopped
                 ? "Someone broke it. Change its setup, then restart it. Your main funds are safe."
-                : "Your main funds can only go to approved suppliers. The bounty is the only open door."}
+                : "Your main funds can only go to approved suppliers. Only the bounty can reach an address off the list."}
         </p>
       </div>
     </section>
@@ -172,6 +177,7 @@ function MainFunds({ amount, locked, onDone }: { amount?: bigint; locked: boolea
 function Bounty({
   amount,
   unlockAt,
+  currentLock,
   stopped,
   now,
   minKunci,
@@ -180,6 +186,7 @@ function Bounty({
 }: {
   amount?: bigint;
   unlockAt: number;
+  currentLock: bigint;
   stopped: boolean;
   now: number;
   minKunci: number;
@@ -190,8 +197,19 @@ function Bounty({
   const [v, setV] = useState("");
   const [mins, setMins] = useState(String(minMinutes));
   const w = useVaultWrite(onDone);
+  const client = usePublicClient();
   const wei = toWei(v);
   const lockMins = Math.max(minMinutes, Math.floor(Number(mins) || 0));
+  // Kontrak menolak kunci yang lebih awal dari kunci sekarang atau dari waktu blok + minKunci.
+  // Waktu diambil dari blok terbaru (bukan jam browser) dan diberi jeda 60 detik untuk waktu menambang.
+  const addBounty = async () => {
+    if (!wei || !client) return;
+    const blk = await client.getBlock().catch(() => null);
+    const chainNow = blk ? blk.timestamp : BigInt(now);
+    const wanted = chainNow + BigInt(lockMins * 60);
+    const kunci = (wanted > currentLock ? wanted : currentLock) + BigInt(60);
+    await w.run("isiCelengan", [kunci], wei);
+  };
   const canWithdraw = stopped || (now > 0 && now >= unlockAt);
   const leftMin = Math.ceil((unlockAt - now) / 60);
   return (
@@ -212,7 +230,7 @@ function Bounty({
           type="button"
           className={btnCls()}
           disabled={locked || !wei || w.busy || now === 0}
-          onClick={() => wei && w.run("isiCelengan", [BigInt(now + lockMins * 60)], wei)}
+          onClick={addBounty}
         >
           Add, lock {lockMins} min
         </button>
@@ -242,6 +260,7 @@ function Suppliers({ locked }: { locked: boolean }) {
     <Card title="Approved suppliers" icon={<ListChecks size={16} aria-hidden />}>
       <ul className="flex flex-col">
         {list.map((s, i) => {
+          const loaded = !VAULT_READY || reads.data?.[i]?.status === "success";
           const on = VAULT_READY ? reads.data?.[i]?.result === true : true;
           return (
             <li key={s.address} className="flex items-center justify-between gap-3 border-b border-line py-3 last:border-0">
@@ -251,11 +270,11 @@ function Suppliers({ locked }: { locked: boolean }) {
               </span>
               <button
                 type="button"
-                disabled={locked || w.busy}
+                disabled={locked || w.busy || !loaded}
                 onClick={() => w.run("aturAllowlist", [s.address, !on])}
                 className={`shrink-0 text-[13px] font-semibold disabled:opacity-40 ${on ? "text-warn" : "text-ok"}`}
               >
-                {on ? "Remove" : "Approve"}
+                {!loaded ? "Checking" : on ? "Remove" : "Approve"}
               </button>
             </li>
           );
@@ -287,11 +306,12 @@ function Suppliers({ locked }: { locked: boolean }) {
   );
 }
 
-function Setup({ stopped, locked, onDone }: { stopped: boolean; locked: boolean; onDone: () => void }) {
+function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current?: Hex; locked: boolean; onDone: () => void }) {
   const [v, setV] = useState("");
   const [hint, setHint] = useState<string | null>(null);
   const w = useVaultWrite(onDone);
-  const valid = isHex(v) && v.length === 66;
+  const same = !!current && v.toLowerCase() === current.toLowerCase();
+  const valid = isHex(v) && v.length === 66 && !same;
   const loadFromAgent = async () => {
     setHint(null);
     const r = await fetch("/api/kesehatan", { cache: "no-store" }).catch(() => null);
@@ -326,6 +346,7 @@ function Setup({ stopped, locked, onDone }: { stopped: boolean; locked: boolean;
       </div>
       <WriteStatus state={w.state} />
       {hint ? <p className="text-[13px] font-semibold text-warn">{hint}</p> : null}
+      {same ? <p className="text-[13px] font-semibold text-warn">This is the current setup. Change the model or prompt first.</p> : null}
       <Note>
         {stopped
           ? "Change the model or prompt first. Restarting with the same setup is not allowed. The score starts from zero."
@@ -422,7 +443,7 @@ function AdminTools() {
         <textarea
           id="invoice-text"
           rows={3}
-          placeholder="Tagihan resmi #12 dari Susu Segar Kaliurang sebesar 0.02 MON. Mohon dibayar."
+          placeholder="Invoice #12 from Susu Segar Kaliurang, 0.02 MON. Please pay."
           value={teks}
           onChange={(e) => setTeks(e.target.value)}
           className={`${fieldCls} h-auto resize-none py-3`}

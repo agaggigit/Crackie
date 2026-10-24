@@ -297,7 +297,7 @@ function catatPercobaan(bytes32 hashPesan) external;
 function klaimHadiah() external;
 
 // Saat deploy
-constructor(address agent, uint256 limitPerTx, uint256 limitPerJam, uint256 minKunci, bytes32 sidikJari);
+constructor(address pemilik, address agent, uint256 limitPerTx, uint256 limitPerJam, uint256 minKunci, bytes32 sidikJari);
 //   minKunci: 7 hari untuk produk, ±5 menit untuk demo
 
 // Dipanggil pemilik
@@ -332,6 +332,8 @@ event SidikJariDiganti(bytes32 sidikJari);
 > **Perubahan 22 Okt (dari SC):** `nyalakanLagi` sekarang menerima `sidikJariBaru`, `constructor` menerima `minKunci`, dan `status()` menambah `kunciSampai`. BE dan FE menyesuaikan.
 >
 > **Perubahan 23 Okt (dari SC, `docs/prd/sc.md` 4.6):** `status()` memecah `jumlahPercobaan` jadi `totalPercobaan` + `percobaanSejakNyala`; event baru `SidikJariDiganti`; fungsi baru `klaimHadiah()` dan `aturErc8004()`; getter `blokDeploy()`; `tarikCelengan()` juga boleh setelah jebol. `web/src/abi/JebolVault.ts` akan berisi `JEBOL_VAULT_DEPLOY_BLOCK`. Gas limit `bayar` di BE disesuaikan setelah SC mengukur gas jalur alarm.
+>
+> **Perubahan 24 Okt (dari SC, `docs/prd/sc.md` 4.6 nomor 7):** `constructor` menerima `pemilik` sebagai parameter pertama (sebelumnya `msg.sender`), supaya wallet deployer boleh berbeda dari wallet pemilik. Hanya berdampak ke skrip deploy; BE dan FE tetap membaca `pemilik()`.
 
 **Endpoint backend** (API route di `web/`, satu origin dengan FE; final di `docs/prd/be.md` Bagian 4):
 

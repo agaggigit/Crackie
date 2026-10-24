@@ -32,12 +32,12 @@ export const vaultAbi = parseAbi([
 
 const ALAMAT_NOL = "0x0000000000000000000000000000000000000000";
 
-// NEXT_PUBLIC_JEBOL_VAULT_ALAMAT hanya untuk uji lokal (anvil). Di testnet alamat dari web/src/abi/CrackieVault.ts.
-export const VAULT_ADDRESS = (process.env.NEXT_PUBLIC_JEBOL_VAULT_ALAMAT ||
+// NEXT_PUBLIC_CRACKIE_VAULT_ALAMAT hanya untuk uji lokal (anvil). Di testnet alamat dari web/src/abi/CrackieVault.ts.
+export const VAULT_ADDRESS = (process.env.NEXT_PUBLIC_CRACKIE_VAULT_ALAMAT ||
   CRACKIE_VAULT_ADDRESS) as Address;
 
 // Blok awal untuk getLogs. Diganti CRACKIE_VAULT_DEPLOY_BLOCK dari SC setelah deploy.
-export const VAULT_DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_JEBOL_VAULT_BLOK || 0);
+export const VAULT_DEPLOY_BLOCK = BigInt(process.env.NEXT_PUBLIC_CRACKIE_VAULT_BLOK || 0);
 
 // Selama kontrak belum ada, UI memakai data demo yang ditandai jelas.
 export const VAULT_READY = VAULT_ADDRESS.toLowerCase() !== ALAMAT_NOL;

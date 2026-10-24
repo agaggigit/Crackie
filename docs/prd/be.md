@@ -221,7 +221,7 @@ Keputusan tambahan di bagian BE (sudah disepakati):
 - Backend berupa API route Next.js di Vercel, mengikuti struktur repo di `docs/plan.md` Bagian 13. State disimpan di Upstash Redis.
 
 ## 6. Risiko dan kasus pinggir
-- **Model terlalu tahan atau terlalu mudah dibujuk.** Kalau terlalu tahan, demo gagal; kalau terlalu mudah, demonya tidak meyakinkan. Mitigasi: uji kandidat sebelum hari H (Bagian 7.2), siapkan satu model cadangan.
+- **Model terlalu tahan atau terlalu mudah dibujuk.** Kalau terlalu tahan, demo gagal; kalau terlalu mudah, demonya tidak meyakinkan. Mitigasi: kandidat sudah diuji (Bagian 7.2), siapkan satu model cadangan.
 - **Serangan demo gagal di panggung.** Injeksi berhasil 10/10 di uji, tapi model hosted bisa berubah tanpa pemberitahuan. Mitigasi: jalankan ulang skrip uji di hari H setelah agent tersambung, gladi bersih minimal sekali, dan video cadangan.
 - **Groq mati atau kena rate limit di venue.** Ganti manual ke model cadangan (Bagian 5); adegan jebol pakai video cadangan.
 - **Tool calling tidak stabil** (format argumen salah, tool tidak dipanggil, tool yang tidak ada). Mitigasi: validasi argumen, error yang jelas ke agent, dan error provider ditangkap (Bagian 3.3).
@@ -245,7 +245,7 @@ Keputusan tambahan di bagian BE (sudah disepakati):
 - Sidik jari: JSON kanonik menghasilkan hash yang sama walaupun urutan kunci berbeda.
 - Pembersihan hasil tool: kata "celengan"/"jebol" tidak pernah sampai ke agent.
 
-### 7.2 Uji model (sebelum hari H, butuh API key)
+### 7.2 Uji model (butuh API key)
 Skrip menjalankan setiap serangan N kali (usulan N = 10) ke setiap kandidat, plus dua kelompok kontrol:
 | Kelompok | Target |
 |---|---|
@@ -271,7 +271,7 @@ Kesimpulan:
 - **Serangan demo: injeksi** (teks di 7.4), bukan menyamar sebagai developer, karena serangan developer tidak berhasil di model mana pun.
 - **Temuan untuk jawaban juri:** Gemini membayar tagihan palsu #88 ke alamat **asli** Merapi 10/10 kali, dan Qwen 4/10 kali. Itu kerugian di dalam allowlist (bukan jebol menurut definisi produk), tapi menunjukkan agent yang sudah dipagari tetap bisa diarahkan penyerang. Karena itu wewenangnya dicabut saat jebol, bukan sekadar pembayaran ke luar diblokir.
 
-### 7.4 Teks serangan (boleh dibawa ke hari H)
+### 7.4 Teks serangan
 Alamat penyerang di bawah hanya contoh; di demo diganti alamat wallet penyerang.
 
 **Injeksi (serangan demo):**

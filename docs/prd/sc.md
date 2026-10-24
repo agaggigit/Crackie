@@ -236,7 +236,7 @@ BE memakai gas limit tetap (`GAS_LIMIT_BAYAR`, usulan awal 300.000). **Angka itu
 
 **Hasil ukur 24 Okt (fork testnet, harga gas Ethereum):** normal ±103.000, alarm + ERC-8004 ±249.000, revert setelah jebol ±6.600. ERC-8004 baru tertulis kalau gas limit ≥450.000. Foundry memakai harga gas Ethereum, sedangkan Monad lebih mahal untuk akses dingin (akun 10.100 vs 2.600, slot 8.100 vs 2.100), jadi angka asli lebih besar dan 500.000 kemungkinan tidak cukup. Angka final diambil dari `cast estimate` ke RPC testnet setelah deploy. Ingat: Monad menagih gas berdasarkan gas limit, bukan gas terpakai.
 
-**`CADANGAN_GAS = 60_000`** (bukan 40.000): sisa gas yang dijaga setelah transfer hadiah. Dengan harga Monad, CALL ke kontrak dingin + value butuh ±19.100 dan SSTORE `hadiahTertunda` nol→isi ±28.100. Dengan 40.000, penerima kontrak yang menghabiskan gas bisa membuat alarm revert kehabisan gas.
+**`CADANGAN_GAS = 60_000`** (bukan 40.000): sisa gas yang dijaga setelah transfer hadiah. Dengan harga Monad, CALL ke kontrak dingin + value butuh ±19.100 dan SSTORE `hadiahTertunda` (slot baru di halaman storage dingin) 27.900, sesuai `docs.monad.xyz/developer-essentials/opcode-pricing`. Dengan 40.000, penerima kontrak yang menghabiskan gas bisa membuat alarm revert kehabisan gas.
 
 ### 4.6 Perubahan dari draf `docs/plan.md` Bagian 13
 1. `status()`: `jumlahPercobaan` → `totalPercobaan` + `percobaanSejakNyala`.

@@ -30,9 +30,10 @@ contract JebolVault {
     uint256 public constant GAS_ERC8004 = 300_000;
     /// @dev Sisa gas minimum setelah panggilan eksternal di jalur alarm, supaya alarm tidak pernah
     ///      gagal karena kehabisan gas (catat hadiah tertunda + selesai).
-    ///      Dihitung dengan harga gas Monad (akses akun dingin 10.100, slot dingin 8.100):
-    ///      CALL ke kontrak dingin + value ±19.100, lalu SSTORE hadiahTertunda nol→isi ±28.100.
-    ///      Butuh ≥ ±48.200 di atas GAS_TRANSFER_HADIAH; 40.000 (cukup di Ethereum) bisa OOG di Monad.
+    ///      Dihitung dengan harga gas Monad (docs.monad.xyz/developer-essentials/opcode-pricing):
+    ///      CALL ke kontrak dingin + value ±19.100 (akun dingin 10.100), lalu SSTORE hadiahTertunda
+    ///      slot baru di halaman storage dingin 27.900. Butuh ≥ ±48.000 di atas GAS_TRANSFER_HADIAH;
+    ///      40.000 (cukup di Ethereum) bisa OOG di Monad.
     uint256 private constant CADANGAN_GAS = 60_000;
 
     // ---------------------------------------------------------------------

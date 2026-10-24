@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { parseEther, type Address } from "viem";
+import { useReadContract } from "wagmi";
 import { ArrowButton } from "@/components/ui/Button";
 import { Jebi } from "@/components/ui/Jebi";
 import { Melt } from "@/components/ui/Melt";
-import { shortAddress, txUrl } from "@/utils/format";
+import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
+import { shortAddress, splitMon, txUrl } from "@/utils/format";
 
 // Momen jebol (desain A5, M5). Layar penuh di mobile, modal di desktop.
 export function BrokeModal({
@@ -28,7 +31,25 @@ export function BrokeModal({
     // Tanpa cleanup close(): di StrictMode cleanup ikut terpanggil dan langsung menutup modal.
     if (d && !d.open) d.showModal();
   }, []);
-  const [int, dec = "00"] = Number(hadiah).toFixed(2).split(".");
+  const wei = parseEther(hadiah || "0");
+  const { int, dec } = splitMon(wei);
+  // Hadiah yang gagal dikirim ditahan di hadiahTertunda dan harus diklaim (docs/prd/sc.md 3.4).
+  const tertunda = useReadContract({
+    address: VAULT_ADDRESS,
+    abi: vaultAbi,
+    functionName: "hadiahTertunda",
+    args: [penemu as Address],
+    query: { enabled: VAULT_READY && wei > BigInt(0) },
+  });
+  const waiting = (tertunda.data ?? BigInt(0)) > BigInt(0);
+  const empty = wei === BigInt(0);
+  const who = isYou ? "you" : shortAddress(penemu);
+  const body = empty
+    ? "It paid an address that was not on its list. The bounty was empty, so nothing was paid, but KopiBot can no longer pay."
+    : waiting
+      ? "It paid an address that was not on its list. The bounty is waiting to be claimed and KopiBot can no longer pay."
+      : "It paid an address that was not on its list. The bounty went to that address and KopiBot can no longer pay.";
+  const label = empty ? "Bounty was empty" : waiting ? `Bounty waiting for ${who}` : `Bounty paid to ${who}`;
 
   return (
     <dialog
@@ -46,15 +67,15 @@ export function BrokeModal({
             KopiBot broke
           </h2>
           <p className="max-w-[460px] text-[15px] leading-relaxed text-white/90 sm:text-[17px]">
-            It paid an address that was not on its list. The bounty went to that address and KopiBot can no longer pay.
+            {body}
           </p>
           <div className="mt-2 flex w-full flex-col gap-4 rounded-[28px] bg-navy p-5 text-left sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-sm text-white/60">{isYou ? "Bounty paid to you" : `Bounty paid to ${shortAddress(penemu)}`}</div>
+              <div className="text-sm text-white/60">{label}</div>
               <div className="flex items-baseline gap-2">
                 <span className="font-head text-5xl font-semibold tracking-[-0.045em] tabular-nums">
                   {int}
-                  <span className="num-dim">.{dec}</span>
+                  <span className="num-dim">{dec}</span>
                 </span>
                 <span className="text-white/60">MON</span>
               </div>

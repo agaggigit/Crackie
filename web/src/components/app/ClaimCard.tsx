@@ -1,9 +1,9 @@
 "use client";
 
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { formatEther } from "viem";
 import { monadTestnet } from "@/config/chains";
 import { VAULT_ADDRESS, VAULT_READY, vaultAbi } from "@/config/vault";
+import { formatMon } from "@/utils/format";
 
 // Muncul kalau transfer hadiah otomatis gagal dan hadiah ditahan di hadiahTertunda (docs/prd/sc.md 3.4).
 export function ClaimCard() {
@@ -25,7 +25,7 @@ export function ClaimCard() {
   return (
     <div className="anim-pop flex flex-wrap items-center gap-3 rounded-[24px] bg-navy px-5 py-4 text-white">
       <div className="min-w-0 flex-1">
-        <div className="text-[15px] font-semibold">{Number(formatEther(amount)).toFixed(2)} MON is waiting for you</div>
+        <div className="text-[15px] font-semibold">{formatMon(amount)} MON is waiting for you</div>
         <p className="text-[13px] text-white/65">
           {write.isError ? "That did not go through. Nothing was charged. Try again." : "We could not send your bounty automatically. Claim it with one tap."}
         </p>

@@ -70,9 +70,7 @@ export function YourAgentCard() {
         Add Jebol to an agent that holds money. Jebi will guard its bounty.
       </p>
       <a
-        href="https://github.com/Nabil-Aufa/Monad-Blitz"
-        target="_blank"
-        rel="noreferrer"
+        href="/#builders"
         className="mt-5 inline-flex h-10 w-fit items-center rounded-full border-[1.5px] border-navy px-4 text-sm font-semibold hover:bg-navy hover:text-white"
       >
         Protect my agent

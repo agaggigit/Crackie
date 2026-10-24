@@ -90,7 +90,10 @@ export function OwnerPanel() {
   const wrongChain = isOwner && chainId !== monadTestnet.id;
   const locked = !isOwner || wrongChain;
   const stopped = !!status && !status.aktif;
+  // Token admin dipakai dua kartu (tagihan dan percobaan) yang ada di kolom berbeda.
+  const [adminToken, setAdminToken] = useState("");
 
+  // Kartu terakhir tiap kolom diberi flex-1 supaya ujung bawah ketiga kolom rata.
   return (
     <>
       <OwnerHero stopped={stopped} isDemo={isDemo} isOwner={isOwner} wrongChain={wrongChain} pemilik={pemilik} />
@@ -107,14 +110,15 @@ export function OwnerPanel() {
             locked={locked}
             onDone={refetch}
           />
+          <RecentTries token={adminToken} className="flex-1" />
         </div>
         <div className="flex flex-col gap-3">
           <Suppliers locked={locked} />
-          <AdminTools />
+          <SendInvoice token={adminToken} onToken={setAdminToken} className="flex-1" />
         </div>
         <div className="flex flex-col gap-3 md:col-span-2 md:grid md:grid-cols-2 xl:col-span-1 xl:flex">
           <Setup stopped={stopped} current={status?.sidikJari} locked={locked} onDone={refetch} />
-          <Reputation locked={locked} />
+          <Reputation locked={locked} className="flex-1" />
         </div>
       </div>
     </>
@@ -396,13 +400,13 @@ function Setup({ stopped, current, locked, onDone }: { stopped: boolean; current
   );
 }
 
-function Reputation({ locked }: { locked: boolean }) {
+function Reputation({ locked, className }: { locked: boolean; className?: string }) {
   const [reg, setReg] = useState(REPUTATION_REGISTRY);
   const [id, setId] = useState("");
   const w = useVaultWrite();
   const ok = isAddress(reg) && /^\d+$/.test(id);
   return (
-    <Card title="Agent reputation" icon={<BadgeCheck size={16} aria-hidden />}>
+    <Card title="Agent reputation" icon={<BadgeCheck size={16} aria-hidden />} className={className}>
       <Note>Write each break to the ERC-8004 registry on Monad so other apps can see it.</Note>
       <label className="sr-only" htmlFor="rep-registry">
         Registry address
@@ -425,12 +429,9 @@ const HASIL: Record<string, string> = { dibayar: "Paid", crackie: "Broke", jebol
 type Percobaan = { ke: number | null; penyerang: string | null; saluran: string; pesan: string; status: string; aksi: { hasil: string } | null; waktu: string };
 
 // Alat demo lewat endpoint admin BE. Token diketik, tidak disimpan.
-function AdminTools() {
-  const [token, setToken] = useState("");
+function SendInvoice({ token, onToken, className }: { token: string; onToken: (v: string) => void; className?: string }) {
   const [teks, setTeks] = useState("");
   const [sendState, setSendState] = useState<{ kind: "idle" | "busy" | "ok" | "err"; text?: string }>({ kind: "idle" });
-  const [tries, setTries] = useState<Percobaan[] | null>(null);
-  const [triesErr, setTriesErr] = useState<string | null>(null);
   const auth = { authorization: `Bearer ${token}` };
 
   const sendInvoice = async () => {
@@ -451,9 +452,51 @@ function AdminTools() {
     setSendState({ kind: "err", text: "KopiBot is busy. Try again in a moment." });
   };
 
+  return (
+    <Card title="Send a normal invoice" icon={<Receipt size={16} aria-hidden />} className={className}>
+      <label className="sr-only" htmlFor="admin-token">
+        Admin token
+      </label>
+      <input
+        id="admin-token"
+        type="password"
+        autoComplete="off"
+        placeholder="Admin token"
+        value={token}
+        onChange={(e) => onToken(e.target.value)}
+        className={fieldCls}
+      />
+      <label className="sr-only" htmlFor="invoice-text">
+        Invoice text
+      </label>
+      <textarea
+        id="invoice-text"
+        rows={3}
+        placeholder="Invoice #12 from Susu Segar Kaliurang, 0.02 MON. Please pay."
+        value={teks}
+        onChange={(e) => setTeks(e.target.value)}
+        className={`${fieldCls} h-auto resize-none py-3`}
+      />
+      <button type="button" className={`${btnCls()} w-fit`} disabled={!token || !teks || sendState.kind === "busy"} onClick={sendInvoice}>
+        {sendState.kind === "busy" ? "Sending" : "Send"}
+      </button>
+      {sendState.text ? (
+        <p role="status" className={`text-[13px] leading-relaxed ${sendState.kind === "err" ? "font-semibold text-warn" : "text-ink-2"}`}>
+          {sendState.text}
+        </p>
+      ) : null}
+      <Note>For demos. This is the owner channel, not a try, and it does not count toward the score.</Note>
+    </Card>
+  );
+}
+
+function RecentTries({ token, className }: { token: string; className?: string }) {
+  const [tries, setTries] = useState<Percobaan[] | null>(null);
+  const [triesErr, setTriesErr] = useState<string | null>(null);
+
   const loadTries = async () => {
     setTriesErr(null);
-    const r = await fetch("/api/admin/percobaan?batas=10", { headers: auth, cache: "no-store" }).catch(() => null);
+    const r = await fetch("/api/admin/percobaan?batas=10", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" }).catch(() => null);
     if (!r || !r.ok) {
       setTries(null);
       setTriesErr(r && (r.status === 401 || r.status === 403) ? "Wrong admin token." : "Could not load tries.");
@@ -463,66 +506,30 @@ function AdminTools() {
   };
 
   return (
-    <>
-      <Card title="Send a normal invoice" icon={<Receipt size={16} aria-hidden />}>
-        <label className="sr-only" htmlFor="admin-token">
-          Admin token
-        </label>
-        <input
-          id="admin-token"
-          type="password"
-          autoComplete="off"
-          placeholder="Admin token"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          className={fieldCls}
-        />
-        <label className="sr-only" htmlFor="invoice-text">
-          Invoice text
-        </label>
-        <textarea
-          id="invoice-text"
-          rows={3}
-          placeholder="Invoice #12 from Susu Segar Kaliurang, 0.02 MON. Please pay."
-          value={teks}
-          onChange={(e) => setTeks(e.target.value)}
-          className={`${fieldCls} h-auto resize-none py-3`}
-        />
-        <button type="button" className={`${btnCls()} w-fit`} disabled={!token || !teks || sendState.kind === "busy"} onClick={sendInvoice}>
-          {sendState.kind === "busy" ? "Sending" : "Send"}
-        </button>
-        {sendState.text ? (
-          <p role="status" className={`text-[13px] leading-relaxed ${sendState.kind === "err" ? "font-semibold text-warn" : "text-ink-2"}`}>
-            {sendState.text}
-          </p>
-        ) : null}
-        <Note>For demos. This is the owner channel, not a try, and it does not count toward the score.</Note>
-      </Card>
-      <Card title="Recent tries" icon={<MessageSquare size={16} aria-hidden />}>
-        <Note>Full messages are only visible to you. Uses the admin token above.</Note>
-        <button type="button" className={`${btnCls(false)} w-fit`} disabled={!token} onClick={loadTries}>
-          Load tries
-        </button>
-        {triesErr ? <p className="text-[13px] font-semibold text-warn">{triesErr}</p> : null}
-        {tries ? (
-          tries.length === 0 ? (
-            <Note>No tries yet.</Note>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {tries.map((t, i) => (
-                <li key={`${t.ke}-${i}`} className="rounded-2xl bg-field px-4 py-3">
-                  <div className="flex justify-between gap-2 text-sm font-semibold">
-                    <span>{t.saluran === "pemilik" ? "Owner invoice" : `Try ${t.ke}`}</span>
-                    <span className="text-ink-2">{t.status === "diproses" ? "Reading" : t.aksi ? (HASIL[t.aksi.hasil] ?? "Sent") : "Held"}</span>
-                  </div>
-                  <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-[13px] text-ink-2">{t.pesan}</p>
-                  <p className="mt-1 text-xs text-ink-3">{formatDate(Date.parse(t.waktu) / 1000)}</p>
-                </li>
-              ))}
-            </ul>
-          )
-        ) : null}
-      </Card>
-    </>
+    <Card title="Recent tries" icon={<MessageSquare size={16} aria-hidden />} className={className}>
+      <Note>Full messages are only visible to you. Uses the admin token from the invoice card.</Note>
+      <button type="button" className={`${btnCls(false)} w-fit`} disabled={!token} onClick={loadTries}>
+        Load tries
+      </button>
+      {triesErr ? <p className="text-[13px] font-semibold text-warn">{triesErr}</p> : null}
+      {tries ? (
+        tries.length === 0 ? (
+          <Note>No tries yet.</Note>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {tries.map((t, i) => (
+              <li key={`${t.ke}-${i}`} className="rounded-2xl bg-field px-4 py-3">
+                <div className="flex justify-between gap-2 text-sm font-semibold">
+                  <span>{t.saluran === "pemilik" ? "Owner invoice" : `Try ${t.ke}`}</span>
+                  <span className="text-ink-2">{t.status === "diproses" ? "Reading" : t.aksi ? (HASIL[t.aksi.hasil] ?? "Sent") : "Held"}</span>
+                </div>
+                <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-[13px] text-ink-2">{t.pesan}</p>
+                <p className="mt-1 text-xs text-ink-3">{formatDate(Date.parse(t.waktu) / 1000)}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : null}
+    </Card>
   );
 }

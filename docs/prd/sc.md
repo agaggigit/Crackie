@@ -32,7 +32,7 @@ Bagian ini membuat **`JebolVault`**, kontrak yang menjadi wallet agent. Kontrak 
 ### 3.1 Peran
 | Peran | Siapa | Boleh memanggil |
 |---|---|---|
-| Pemilik | `msg.sender` saat deploy (immutable) | Semua fungsi pemilik |
+| Pemilik | Alamat dari constructor (immutable), boleh berbeda dari deployer | Semua fungsi pemilik |
 | Agent | Alamat dari constructor (immutable), wallet yang dipegang BE | `bayar` |
 | Siapa pun | Penyerang, penonton | `catatPercobaan`, `klaimHadiah`, semua view |
 
@@ -67,10 +67,11 @@ Konstanta: `BATAS_PERCOBAAN = 100` (rating), `BATAS_PERCOBAAN_PER_JAM = 10` (per
 
 ### 3.3 Constructor
 ```solidity
-constructor(address agent, uint256 limitPerTx, uint256 limitPerJam, uint256 minKunci, bytes32 sidikJari)
+constructor(address pemilik, address agent, uint256 limitPerTx, uint256 limitPerJam, uint256 minKunci, bytes32 sidikJari)
 ```
-- `pemilik = msg.sender`, `blokDeploy = block.number`, `aktif = true`, `bertahanSejak = terakhirUbah = block.timestamp`.
-- Revert kalau `agent == 0`, `limitPerTx == 0`, `limitPerJam < limitPerTx`, atau `sidikJari == 0`.
+- `pemilik` diambil dari parameter, bukan `msg.sender`, supaya wallet deployer boleh berbeda dari wallet pemilik (key pemilik untuk panel FE tidak perlu dipakai untuk deploy).
+- `blokDeploy = block.number`, `aktif = true`, `bertahanSejak = terakhirUbah = block.timestamp`.
+- Revert kalau `pemilik == 0`, `agent == 0`, `limitPerTx == 0`, `limitPerJam < limitPerTx`, atau `sidikJari == 0`.
 - `minKunci`: 7 hari untuk produk, ±5 menit untuk demo (Bagian 15 nomor 5).
 
 ### 3.4 `bayar(address ke, uint256 jumlah)`
@@ -188,7 +189,7 @@ function giveFeedback(
 - `contracts/lib/` di-ignore. Setiap anggota menjalankan `forge install foundry-rs/forge-std` sendiri setelah clone.
 - `nonReentrant` ditulis sendiri (modifier kecil), tanpa dependensi OpenZeppelin.
 - Error memakai custom error (`error BukanAgent();` dst.), bukan string.
-- Skrip `script/Deploy.s.sol` membaca parameter constructor dari environment (`AGENT_ADDRESS`, `LIMIT_PER_TX`, `LIMIT_PER_JAM`, `MIN_KUNCI`, `SIDIK_JARI`). Private key deployer dari `contracts/.env` atau `--interactive`, tidak pernah di-commit.
+- Skrip `script/Deploy.s.sol` membaca parameter constructor dari environment (`PEMILIK_ADDRESS`, `AGENT_ADDRESS`, `LIMIT_PER_TX`, `LIMIT_PER_JAM`, `MIN_KUNCI`, `SIDIK_JARI`). Private key deployer dari `contracts/.env` atau `--interactive`, tidak pernah di-commit.
 
 ## 4. Antarmuka ke bagian lain (wajib)
 
@@ -233,6 +234,19 @@ export const jebolVaultAbi = [ … ] as const;       // dari contracts/out/Jebol
 ### 4.5 Gas `bayar` untuk BE
 BE memakai gas limit tetap (`GAS_LIMIT_BAYAR`, usulan awal 300.000). **Angka itu tidak cukup untuk jalur alarm dengan ERC-8004**, karena `giveFeedback` saja butuh ±261.000 gas dan kontrak memberinya jatah 300.000. Usulan awal untuk BE: **`GAS_LIMIT_BAYAR = 500000`**. SC mengukur gas tiga jalur (normal, alarm dengan ERC-8004, revert setelah jebol) lewat `forge test --gas-report` dan di testnet, lalu mengumumkan angka final. Kalau gas limit BE terlalu kecil, alarm tetap jalan tapi feedback ERC-8004 tidak tertulis.
 
+**Hasil ukur 24 Okt (fork testnet, harga gas Ethereum):** normal ±103.000, alarm + ERC-8004 ±249.000, revert setelah jebol ±6.600. ERC-8004 baru tertulis kalau gas limit ≥450.000. Foundry memakai harga gas Ethereum, sedangkan Monad lebih mahal untuk akses dingin (akun 10.100 vs 2.600, slot 8.100 vs 2.100), jadi angka asli lebih besar dan 500.000 kemungkinan tidak cukup. Angka final diambil dari `cast estimate` ke RPC testnet setelah deploy. Ingat: Monad menagih gas berdasarkan gas limit, bukan gas terpakai.
+
+**Angka final di Monad testnet (24 Okt, `debug_traceCall` ke RPC Monad, kontrak `0xee72…b566`):**
+| Jalur | Gas limit minimum |
+|---|---|
+| `bayar` normal (ke allowlist) | ±123.500 (`cast estimate`) |
+| Alarm, hadiah terkirim langsung | antara 155.000 dan 160.000 (di bawahnya hadiah masuk `hadiahTertunda`) |
+| Alarm + ERC-8004 tertulis + hadiah terkirim | antara 450.000 dan 480.000 (di bawahnya ERC-8004 dilewati) |
+
+`cast estimate` untuk jalur alarm menyesatkan: hasilnya ±77.000 karena estimate mencari gas terkecil yang tidak revert, dan jalur alarm sengaja tidak revert (hadiah ditunda, ERC-8004 dilewati). **Keputusan untuk BE: `GAS_LIMIT_BAYAR = 550000`** (aman untuk ketiga jalur, ±0,056 MON per panggilan di 102 gwei). Kalau ERC-8004 dipotong, 200.000 sudah cukup.
+
+**`CADANGAN_GAS = 60_000`** (bukan 40.000): sisa gas yang dijaga setelah transfer hadiah. Dengan harga Monad, CALL ke kontrak dingin + value butuh ±19.100 dan SSTORE `hadiahTertunda` (slot baru di halaman storage dingin) 27.900, sesuai `docs.monad.xyz/developer-essentials/opcode-pricing`. Dengan 40.000, penerima kontrak yang menghabiskan gas bisa membuat alarm revert kehabisan gas.
+
 ### 4.6 Perubahan dari draf `docs/plan.md` Bagian 13
 1. `status()`: `jumlahPercobaan` → `totalPercobaan` + `percobaanSejakNyala`.
 2. Event baru `SidikJariDiganti(bytes32)`.
@@ -240,6 +254,7 @@ BE memakai gas limit tetap (`GAS_LIMIT_BAYAR`, usulan awal 300.000). **Angka itu
 4. Fungsi baru `aturErc8004(address,uint256)` (opsional).
 5. Getter `blokDeploy()` dan konstanta `JEBOL_VAULT_DEPLOY_BLOCK` di `JebolVault.ts`.
 6. `tarikCelengan()` juga boleh saat agent tidak aktif (nomor 7). **FE perlu menyesuaikan** `fe.md` 3.5: tombol aktif kalau `now >= kunciSampai` atau agent dicabut.
+7. `constructor` menerima `pemilik` sebagai parameter pertama (24 Okt). Hanya berdampak ke skrip deploy SC; BE dan FE tetap membaca getter `pemilik()`.
 
 ## 5. Keputusan terbuka yang dijawab di sini
 | No (Bagian 15) | Keputusan | Alasan |

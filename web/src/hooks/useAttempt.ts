@@ -234,9 +234,24 @@ export function useAttempt({ onSettled }: { onSettled?: (o?: Outcome) => void } 
     async (id: string) => {
       const t = turns.find((x) => x.id === id);
       if (busy.current || !t?.recordTx) return;
-      await run(() => deliver(id, t.recordTx!, t.pesan));
+      await run(async () => {
+        // Receipt catatPercobaan yang belum pasti dicek dulu, supaya percobaan yang gagal tidak dikirim ulang terus.
+        if (VAULT_READY && !t.recorded) {
+          const r = await client?.getTransactionReceipt({ hash: t.recordTx! }).catch(() => null);
+          if (!r) {
+            patch(id, { error: "receipt_unknown" });
+            return;
+          }
+          if (r.status !== "success") {
+            patch(id, { error: "not_recorded" });
+            return;
+          }
+          patch(id, { recorded: true });
+        }
+        return deliver(id, t.recordTx!, t.pesan);
+      });
     },
-    [turns, deliver, run],
+    [turns, client, deliver, run],
   );
 
   return { turns, step, sending: step !== null, send, resend };

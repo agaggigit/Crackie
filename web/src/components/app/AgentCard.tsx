@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Amount } from "@/components/ui/Amount";
 import { ArrowButton } from "@/components/ui/Button";
 import { Chip, DemoBadge } from "@/components/ui/Chip";
@@ -69,12 +70,12 @@ export function YourAgentCard() {
       <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-ink-2">
         Add Jebol to an agent that holds money. Jebi will guard its bounty.
       </p>
-      <a
+      <Link
         href="/#builders"
         className="mt-5 inline-flex h-10 w-fit items-center rounded-full border-[1.5px] border-navy px-4 text-sm font-semibold hover:bg-navy hover:text-white"
       >
         Protect my agent
-      </a>
+      </Link>
       <Jebi mood="gift" size={420} className="absolute -bottom-10 -right-10 w-[78%] max-w-[420px]" />
     </article>
   );

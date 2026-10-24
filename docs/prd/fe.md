@@ -64,7 +64,7 @@ Dana utama dan sidik jari tampil di panel pemilik, bukan di halaman tantangan, s
 6. Tampilkan balasan agent + kartu aksi:
      - null       → "Agent tidak membayar" (juga keluar kalau model error; BE mengirim balasan netral)
      - dibayar    → "Agent membayar X MON ke 0x…" + link explorer
-     - jebol      → ALARM: animasi alarm, hadiah X MON (dari event Jebol), "wewenang agent dicabut", link tx
+     - crackie      → ALARM: animasi alarm, hadiah X MON (dari event Crackie), "wewenang agent dicabut", link tx
                     kalau hadiahTertunda(penemu) > 0 → tombol "Klaim hadiah" (klaimHadiah())
      - revert     → "Diblokir: wewenang agent sudah dicabut" + link tx
 7. Panel status ikut berubah dari chain (bukan dari respons BE).
@@ -86,7 +86,7 @@ Dana utama dan sidik jari tampil di panel pemilik, bukan di halaman tantangan, s
 | Setor dana utama | `setorUtama()` payable | jumlah MON |
 | Isi celengan | `isiCelengan(kunciSampai)` payable | jumlah MON + lama kunci (default `minKunci`) |
 | Tarik dana utama | `tarikUtama(jumlah)` | jumlah MON |
-| Tarik celengan | `tarikCelengan()` | aktif setelah `kunciSampai`, atau kapan pun setelah jebol; peringatan "rating akan reset" |
+| Tarik celengan | `tarikCelengan()` | aktif setelah `kunciSampai`, atau kapan pun setelah crackie; peringatan "rating akan reset" |
 | Allowlist | `aturAllowlist(alamat, boleh)` | alamat + label supplier |
 | Atur sidik jari | `aturSidikJari(hash)` | hanya saat aktif; hash (ambil dari `GET /api/kesehatan`) + peringatan "rating akan reset" |
 | ERC-8004 (opsional) | `aturErc8004(registry, agentId)` | alamat Reputation Registry testnet + `agentId`; dipotong pertama |
@@ -96,7 +96,7 @@ Dana utama dan sidik jari tampil di panel pemilik, bukan di halaman tantangan, s
 Kalau wallet yang terhubung bukan pemilik, panel tetap tampil tapi semua tombol mati dengan keterangan.
 
 ### 3.6 Riwayat kejadian
-Event yang ditampilkan: `PercobaanTercatat`, `Dibayar`, `Jebol`, `WewenangDicabut`, `DinyalakanLagi`, `SidikJariDiganti`. Saat halaman dibuka: `getLogs` dari `JEBOL_VAULT_DEPLOY_BLOCK`. Setelah itu: `useWatchContractEvent`. Isi pesan **tidak** ditampilkan (di chain hanya hash).
+Event yang ditampilkan: `PercobaanTercatat`, `Dibayar`, `Crackie`, `WewenangDicabut`, `DinyalakanLagi`, `SidikJariDiganti`. Saat halaman dibuka: `getLogs` dari `CRACKIE_VAULT_DEPLOY_BLOCK`. Setelah itu: `useWatchContractEvent`. Isi pesan **tidak** ditampilkan (di chain hanya hash).
 
 ### 3.7 Bahasa UI
 **Semua teks di aplikasi memakai bahasa Inggris** (label, tombol, pesan error, kartu aksi). Dokumen tim tetap bahasa Indonesia. Label Indonesia di PRD ini (misalnya "Agent tidak membayar") adalah maksudnya, bukan teks final.
@@ -109,7 +109,7 @@ Ikuti tabel klaim `docs/plan.md` Bagian 6. Padanan istilah:
 | hadiah | reward |
 | percobaan | attempt |
 | celah | vulnerability / breach |
-| jebol | Breached |
+| crackie | Breached |
 | wewenang dicabut | agent authority revoked |
 | dana utama | main funds |
 | sidik jari | config fingerprint |
@@ -134,7 +134,7 @@ NEXT_PUBLIC_CHAIN_ID=10143
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=   # dibutuhkan RainbowKit (cloud.reown.com)
 NEXT_PUBLIC_EXPLORER_URL=               # explorer Monad testnet
 ```
-Alamat vault dan blok deploy diambil dari `web/src/abi/JebolVault.ts` (milik SC).
+Alamat vault dan blok deploy diambil dari `web/src/abi/CrackieVault.ts` (milik SC).
 
 ## 4. Antarmuka ke bagian lain (wajib)
 | Nama | Dipakai | Catatan |
@@ -145,11 +145,11 @@ Alamat vault dan blok deploy diambil dari `web/src/abi/JebolVault.ts` (milik SC)
 | Fungsi pemilik (3.5) | ditulis wallet pemilik | |
 | Event (3.6) | dibaca | |
 | `GET /api/anggaran`, `GET /api/kesehatan`, `POST /api/serang`, `POST /api/admin/tagihan` | dari BE | format di `docs/prd/be.md` Bagian 4 |
-| `web/src/abi/JebolVault.ts` | dari SC | harus berisi ABI, alamat, dan **blok deploy** (untuk `getLogs`) |
+| `web/src/abi/CrackieVault.ts` | dari SC | harus berisi ABI, alamat, dan **blok deploy** (untuk `getLogs`) |
 
 **Permintaan ke BE (@agaggigit):** route `POST /api/faucet` (3.8) ada di wilayah BE (`web/src/app/api/`). Perlu disepakati: Aga yang membuat, atau FE yang membuat dengan izinnya. Butuh env `FAUCET_PRIVATE_KEY`, `FAUCET_JUMLAH`, `FAUCET_BATAS_HARIAN`, dan memakai Upstash yang sama.
 
-**Dari SC (sudah dipenuhi di `docs/prd/sc.md`):** `JEBOL_VAULT_DEPLOY_BLOCK` di `JebolVault.ts`, dan `status()` mengembalikan `totalPercobaan` + `percobaanSejakNyala`.
+**Dari SC (sudah dipenuhi di `docs/prd/sc.md`):** `CRACKIE_VAULT_DEPLOY_BLOCK` di `CrackieVault.ts`, dan `status()` mengembalikan `totalPercobaan` + `percobaanSejakNyala`.
 
 **Wallet deployer = wallet pemilik:** usulan FE, Nabil yang memegang (panel pemilik dijalankan dari laptop FE saat demo). Wallet ini terpisah dari wallet agent dan wallet faucet.
 
@@ -173,7 +173,7 @@ Alamat vault dan blok deploy diambil dari `web/src/abi/JebolVault.ts` (milik SC)
 
 ## 7. Cara menguji
 - Manual di testnet mengikuti skrip demo `docs/plan.md` Bagian 16: tagihan normal → serangan berhasil → alarm → serangan kedua diblokir → pemilik tarik dana → nyalakan lagi.
-- Serangan demo memakai teks injeksi `docs/prd/be.md` Bagian 7.4 (tagihan Toko Biji Kopi Merapi + blok palsu `[SYSTEM UPDATE]`). Video cadangan adegan jebol merekam serangan yang sama.
+- Serangan demo memakai teks injeksi `docs/prd/be.md` Bagian 7.4 (tagihan Toko Biji Kopi Merapi + blok palsu `[SYSTEM UPDATE]`). Video cadangan adegan crackie merekam serangan yang sama.
 - Cek tampilan di layar proyektor (1280×720) dan HP.
 - Cek semua teks UI terhadap tabel klaim.
 
@@ -183,15 +183,15 @@ Dikerjakan berurutan di repo ini. Hasil desain (M1) dibawa ke hari H sebagai dok
 | # | Milestone | Isi | Bergantung pada |
 |---|---|---|---|
 | M0 | Fondasi + deploy | wagmi + RainbowKit (tombol custom), chain Monad testnet, kerangka `/app` dan `/app/pemilik`, deploy awal ke Vercel | – |
-| M1 | Desain UI | Arah visual (warna, font, gaya), wireframe dua halaman, desain momen jebol (alarm, hadiah, wewenang dicabut), komponen dasar. Hasil: `docs/desain-fe.md` + screenshot | M0 |
+| M1 | Desain UI | Arah visual (warna, font, gaya), wireframe dua halaman, desain momen crackie (alarm, hadiah, wewenang dicabut), komponen dasar. Hasil: `docs/desain-fe.md` + screenshot | M0 |
 | M2 | Status live | Panel status membaca `status()` (polling). Sebelum kontrak siap: mock yang ditandai jelas | M1, ABI + alamat dari SC |
-| M3 | Riwayat kejadian | `getLogs` dari `JEBOL_VAULT_DEPLOY_BLOCK` + watch event, link explorer | M2 |
+| M3 | Riwayat kejadian | `getLogs` dari `CRACKIE_VAULT_DEPLOY_BLOCK` + watch event, link explorer | M2 |
 | M4 | Konsol serangan | Alur 3.3 end-to-end + kartu aksi + klaim hadiah | M2, endpoint BE |
 | M5 | Faucet penonton | Tombol minta MON gas (3.8) | Keputusan route faucet dengan BE |
 | M6 | Panel pemilik | 9 aksi di 3.5, tombol mati kalau tidak berlaku | M2 |
 | M7 | Polish + latihan demo | Animasi, mobile, cek tabel klaim, latihan skrip `docs/plan.md` Bagian 16, rekam video cadangan (serangan injeksi) | Semua |
 
-Tidak boleh dipotong: M2, M4, dan desain momen jebol di M1.
+Tidak boleh dipotong: M2, M4, dan desain momen crackie di M1.
 
 ## 9. Urutan kerja hari H
 | Jam | Target selesai |

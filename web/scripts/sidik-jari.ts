@@ -1,4 +1,4 @@
-// npm run sidik-jari: cetak hash konfigurasi agent untuk constructor JebolVault / aturSidikJari.
+// npm run sidik-jari: cetak hash konfigurasi agent untuk constructor CrackieVault / aturSidikJari.
 import { konfigurasiAgent, sidikJariLokal, SUPPLIER } from "../src/lib/agent";
 
 const k = konfigurasiAgent();

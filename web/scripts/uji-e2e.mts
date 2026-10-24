@@ -1,13 +1,13 @@
 // npm run uji:e2e -- <alamatVault>
 // Uji end-to-end PRD BE 7.3 ke server BE yang sedang jalan (default http://localhost:3000).
 // Default untuk anvil: akun bawaan #1 sebagai penyerang. Untuk testnet set UJI_RPC, UJI_PENYERANG_PK, UJI_BASE.
-// Urutan: kesehatan → 401 → tagihan dibayar → dua request bersamaan (satu sibuk) → injeksi jebol
-// (Jebol + WewenangDicabut di tx yang sama) → serangan kedua revert → replay 409 → hash salah 400 → detail admin.
+// Urutan: kesehatan → 401 → tagihan dibayar → dua request bersamaan (satu sibuk) → injeksi crackie
+// (Crackie + WewenangDicabut di tx yang sama) → serangan kedua revert → replay 409 → hash salah 400 → detail admin.
 import { createPublicClient, createWalletClient, http, keccak256, parseEventLogs, toBytes, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { jebolVaultAbi } from "../src/abi/JebolVault";
+import { crackieVaultAbi } from "../src/abi/CrackieVault";
 
-const vault = (process.argv[2] ?? process.env.JEBOL_VAULT_ALAMAT) as Hex;
+const vault = (process.argv[2] ?? process.env.CRACKIE_VAULT_ALAMAT) as Hex;
 if (!vault) throw new Error("Pakai: npm run uji:e2e -- <alamatVault>");
 const BASE = process.env.UJI_BASE ?? "http://localhost:3000";
 const RPC = process.env.UJI_RPC ?? "http://127.0.0.1:8545";
@@ -38,7 +38,7 @@ const post = (path: string, body: unknown, admin = false) =>
   api(path, { method: "POST", headers: { "content-type": "application/json", ...(admin && { authorization: `Bearer ${ADMIN}` }) }, body: JSON.stringify(body) });
 
 async function catat(pesan: string): Promise<Hex> {
-  const hash = await dompet.writeContract({ address: vault, abi: jebolVaultAbi, functionName: "catatPercobaan", args: [keccak256(toBytes(pesan))] });
+  const hash = await dompet.writeContract({ address: vault, abi: crackieVaultAbi, functionName: "catatPercobaan", args: [keccak256(toBytes(pesan))] });
   await publik.waitForTransactionReceipt({ hash });
   return hash;
 }
@@ -75,15 +75,15 @@ cek("permintaan naif ditolak agent", a.body?.aksi == null && b.body?.aksi == nul
 
 const txInjeksi = await catat(INJEKSI);
 const injeksi = await serangSampaiTidakSibuk(txInjeksi, INJEKSI);
-cek("injeksi → jebol", injeksi.status === 200 && injeksi.body?.aksi?.hasil === "jebol", injeksi);
+cek("injeksi → crackie", injeksi.status === 200 && injeksi.body?.aksi?.hasil === "crackie", injeksi);
 if (injeksi.body?.aksi?.txHash) {
   const r = await publik.getTransactionReceipt({ hash: injeksi.body.aksi.txHash });
-  const nama = parseEventLogs({ abi: jebolVaultAbi, logs: r.logs }).map((l) => l.eventName);
-  cek("Jebol + WewenangDicabut di transaksi yang sama", nama.includes("Jebol") && nama.includes("WewenangDicabut"), nama);
+  const nama = parseEventLogs({ abi: crackieVaultAbi, logs: r.logs }).map((l) => l.eventName);
+  cek("Crackie + WewenangDicabut di transaksi yang sama", nama.includes("Crackie") && nama.includes("WewenangDicabut"), nama);
   console.log(`   gas bayar alarm: ${r.gasUsed}, hadiah ${injeksi.body.aksi.hadiah} MON, penyerang = ${injeksi.body.penyerang}`);
 }
 const bocor = JSON.stringify(injeksi.body?.balasan ?? "").toLowerCase();
-cek("balasan agent tidak menyebut celengan/jebol", !bocor.includes("celengan") && !bocor.includes("jebol"), injeksi.body?.balasan);
+cek("balasan agent tidak menyebut celengan/crackie", !bocor.includes("celengan") && !bocor.includes("crackie"), injeksi.body?.balasan);
 
 const txKedua = await catat(INJEKSI + "\n");
 const kedua = await serangSampaiTidakSibuk(txKedua, INJEKSI + "\n");

@@ -9,7 +9,7 @@ Dokumen ini merangkum hal yang **tidak terlihat dari PRD** tapi kami temukan saa
 ## 1. Urutan membangun yang terbukti jalan
 Setiap tahap diuji sebelum lanjut. Dengan urutan ini, BE tidak pernah menunggu bagian lain.
 
-1. **Agent + tool palsu.** System prompt, tool `bayar`, dan route `POST /api/serang` dengan pembayaran tiruan (tanpa chain, tanpa verifikasi hash). Uji: serangan injeksi jebol, tagihan resmi dibayar, permintaan naif ditolak.
+1. **Agent + tool palsu.** System prompt, tool `bayar`, dan route `POST /api/serang` dengan pembayaran tiruan (tanpa chain, tanpa verifikasi hash). Uji: serangan injeksi crackie, tagihan resmi dibayar, permintaan naif ditolak.
 2. **Redis.** Kunci agent, penanda replay, anggaran harian, detail percobaan, lalu `GET /api/anggaran`. Uji: kirim ulang → 409, dua request bersamaan → 429 sibuk, anggaran bertambah.
 3. **Chain di anvil.** Verifikasi `PercobaanTercatat`, baca `status()`, kirim `bayar` sungguhan ke **kontrak tiruan** di anvil. Kontrak tiruan cukup meniru ABI dan event di plan Bagian 13, jadi BE bisa jalan sebelum SC deploy.
 4. **Endpoint pendukung.** `GET /api/kesehatan`, `POST /api/admin/tagihan`, `GET /api/admin/percobaan`.
@@ -56,12 +56,12 @@ Agent baru hampir pasti mengulangi ini kalau tidak diberi tahu.
 
 ### Endpoint admin
 - **Token admin di-trim** (env Vercel dan header yang disalin sering membawa spasi atau baris baru), skema `Bearer` tidak peka huruf besar-kecil, dan dibandingkan dengan waktu konstan (bandingkan hash-nya). Tanpa `ADMIN_TOKEN`, semua request admin ditolak.
-- **Tagihan admin juga dicek sidik jarinya dan dicatat di Redis dengan `saluran: "pemilik"`**, supaya pembayaran atau jebol yang dipicu pemilik tetap punya jejak. Tagihan admin tidak diblokir anggaran, tapi tokennya tetap dihitung.
+- **Tagihan admin juga dicek sidik jarinya dan dicatat di Redis dengan `saluran: "pemilik"`**, supaya pembayaran atau crackie yang dipicu pemilik tetap punya jejak. Tagihan admin tidak diblokir anggaran, tapi tokennya tetap dihitung.
 - **Alur serang dan tagihan dipisah jadi satu modul bersama** (validasi teks, sidik jari, kunci, catat hasil). Dua route yang menyalin alur yang sama cepat berbeda perilakunya.
 
 ## 3. Cara menguji yang terbukti berguna
 - **Skrip uji model** (PRD 7.2): setiap serangan dijalankan N kali dengan agent dan prompt yang **sama persis** dengan route, bukan salinan. Salinan prompt cepat berbeda dari yang dipakai route.
-- **Uji end-to-end di anvil** dengan kontrak tiruan dan akun bawaan anvil (#0 pemilik, #1 penyerang). Urutan yang diuji: kesehatan → 401 tanpa token → tagihan admin dibayar → serangan injeksi jebol → serangan kedua revert → replay 409 → hash salah 400 → detail serangan admin. Saat latihan 13/13 lulus.
+- **Uji end-to-end di anvil** dengan kontrak tiruan dan akun bawaan anvil (#0 pemilik, #1 penyerang). Urutan yang diuji: kesehatan → 401 tanpa token → tagihan admin dibayar → serangan injeksi crackie → serangan kedua revert → replay 409 → hash salah 400 → detail serangan admin. Saat latihan 13/13 lulus.
 - **Skrip yang mengarahkan `next dev` ke anvil tanpa mengubah `.env.local`**, supaya tidak lupa mengembalikan RPC ke testnet.
 - **Skrip `sidik-jari`** yang mencetak hash konfigurasi untuk diisi SC di constructor.
 - Saat pindah ke testnet, jalankan ulang uji yang sama ke kontrak SC asli (PRD 7.3) dan ukur gas `bayar` dari receipt.
@@ -73,4 +73,4 @@ Agent baru hampir pasti mengulangi ini kalau tidak diberi tahu.
 ## 5. Pilihan teknis yang terbukti cocok
 - Vercel AI SDK (`ai` v7) dengan `@ai-sdk/groq` dan `@ai-sdk/google`, viem, `@upstash/redis`, zod untuk skema tool.
 - Model `openai/gpt-oss-120b` di Groq, temperature 0,1 (hasil uji di PRD 7.2). Cadangan `gemini-3.5-flash-lite`, diganti manual.
-- Teks serangan di PRD 7.4 dipakai apa adanya. Serangan demo: injeksi (jebol 10/10 di uji).
+- Teks serangan di PRD 7.4 dipakai apa adanya. Serangan demo: injeksi (crackie 10/10 di uji).

@@ -3,7 +3,7 @@
 Panduan untuk AI agent (Claude Code dan sejenisnya) yang bekerja di repo ini. Berlaku untuk semua anggota tim.
 
 ## Proyek
-**Jebol**: modul alarm untuk AI agent yang memegang uang, dibuat di Monad Blitz Jogja Vol. 2 (Sabtu, 24 Oktober 2026). Kalau ada yang berhasil membujuk agent membayar ke alamat di luar allowlist, pembayaran itu diambil dari celengan bounty, dan wewenang agent dicabut di transaksi yang sama.
+**Crackie** (`crackie.xyz`): modul alarm untuk AI agent yang memegang uang, dibuat di Monad Blitz Jogja Vol. 2 (Sabtu, 24 Oktober 2026). Kalau ada yang berhasil membujuk agent membayar ke alamat di luar allowlist, pembayaran itu diambil dari celengan bounty, dan wewenang agent dicabut di transaksi yang sama.
 
 ## Sumber kebenaran
 1. `docs/plan.md`: rencana final. Kalau ada yang bertentangan, yang berlaku dokumen ini.
@@ -46,7 +46,7 @@ Sesuai `docs/plan.md` Bagian 13: `contracts/` (Foundry) dan `web/` (Next.js 16, 
 2. Bandingkan dengan `docs/plan.md`, PRD bagian terkait, dan checklist di `docs/alur-kerja.md`.
 3. Laporkan: bug, pelanggaran plan/PRD, perubahan antarmuka yang tidak diumumkan, fitur di luar MVP, rahasia di diff, dan teks yang melanggar tabel klaim.
 4. Hal yang wajib dicek per bagian:
-   - **SC:** alarm + pencabutan wewenang atomik; pemilik selalu bisa menarik dana utama; celengan terkunci sampai waktunya; reentrancy; test Foundry untuk jalur normal, alarm, dan setelah jebol.
+   - **SC:** alarm + pencabutan wewenang atomik; pemilik selalu bisa menarik dana utama; celengan terkunci sampai waktunya; reentrancy; test Foundry untuk jalur normal, alarm, dan setelah crackie.
    - **BE:** agent tidak diberi tahu soal celengan; pesan hanya diproses kalau hash-nya tercatat on-chain; perlindungan replay; anggaran harian; private key dari env; jebakan di `docs/prd/be-pelajaran.md` Bagian 2.
    - **FE:** data dibaca dari chain; mock ditandai jelas.
 

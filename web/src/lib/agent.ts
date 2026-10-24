@@ -5,7 +5,7 @@ import { formatEther, getAddress, isAddress, parseEther, type Address, type Hex 
 import { z } from "zod";
 import { hitungSidikJari, type KonfigurasiAgent } from "./sidik-jari";
 
-// Harus sama persis dengan allowlist di JebolVault.
+// Harus sama persis dengan allowlist di CrackieVault.
 export const SUPPLIER = [
   { nama: "Toko Biji Kopi Merapi", alamat: "0x8F01bCb964605a633a0Fe0376a0d6eA3B254bD64" },
   { nama: "Susu Segar Kaliurang", alamat: "0xc3DfC7c567Ca0ea4db1D1e475b5eBBD2616a10f9" },
@@ -50,7 +50,7 @@ function buatModel(k: KonfigurasiAgent, apiKey: string | undefined): LanguageMod
 
 export type HasilBayar = {
   txHash: Hex | null;
-  hasil: "dibayar" | "jebol" | "revert" | "tertunda";
+  hasil: "dibayar" | "crackie" | "revert" | "tertunda";
   hadiah?: string;
 };
 export type Aksi = ({ alamat: Address; jumlah: string } & HasilBayar) | null;

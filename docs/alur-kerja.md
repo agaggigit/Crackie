@@ -49,7 +49,7 @@ Setiap PR ke `main` wajib:
 ### Checklist review
 - [ ] Sesuai `docs/plan.md` dan PRD bagiannya. Tidak menambah fitur di luar MVP tanpa kesepakatan.
 - [ ] Tidak mengubah kontrak antar-bagian diam-diam.
-- [ ] **SC:** jalur alarm dan pencabutan wewenang terjadi di transaksi yang sama; pemilik tetap bisa menarik dana utama; celengan tidak bisa ditarik sebelum waktunya; tidak ada reentrancy; ada test Foundry untuk jalur normal, jalur alarm, dan setelah jebol.
+- [ ] **SC:** jalur alarm dan pencabutan wewenang terjadi di transaksi yang sama; pemilik tetap bisa menarik dana utama; celengan tidak bisa ditarik sebelum waktunya; tidak ada reentrancy; ada test Foundry untuk jalur normal, jalur alarm, dan setelah crackie.
 - [ ] **BE:** private key agent tidak pernah di-commit (pakai `.env`); pesan hanya diteruskan ke agent kalau hash-nya tercatat on-chain; ada anggaran harian; agent tidak diberi tahu soal celengan.
 - [ ] **FE:** angka di layar dibaca dari chain, bukan hardcode; jelas kalau ada data yang masih mock.
 - [ ] Teks di UI dan pitch mengikuti tabel klaim (`docs/plan.md` Bagian 6). Tidak ada kata "taruhan", "jackpot", "tiket", "trustless", atau "satu-satunya".

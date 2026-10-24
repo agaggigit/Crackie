@@ -45,7 +45,7 @@ export function AgentRoom() {
     },
     [refetch],
   );
-  const { turns, step, send } = useAttempt({ onSettled });
+  const { turns, step, send, resend } = useAttempt({ onSettled });
   const openFaucet = useOpenFaucet();
 
   const shown =
@@ -98,6 +98,7 @@ export function AgentRoom() {
             turns={turns}
             step={step}
             onSend={send}
+          onResend={resend}
             stopped={stopped}
             banner={stopped ? <StoppedBanner /> : null}
             claim={VAULT_READY ? <ClaimCard /> : null}

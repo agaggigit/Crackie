@@ -172,7 +172,7 @@ function giveFeedback(
 - `agentId` yang tidak terdaftar → revert (tertangkap `try/catch`).
 - Gas ±261.000 per panggilan (termasuk 21.000 gas dasar transaksi).
 
-**Isi feedback saat crackie:** `value = -100`, `valueDecimals = 0`, `tag1 = "crackie"`, `tag2 = ""`, `endpoint = ""`, `feedbackURI = ""`, `feedbackHash = bytes32(0)`. Feedback ini **permanen** di registry, jadi crackie palsu saat latihan ikut tercatat untuk `agentId` itu. Pakai `agentId` khusus latihan.
+**Isi feedback saat crackie:** `value = -100`, `valueDecimals = 0`, `tag1 = "crackie"`, `tag2 = ""`, `endpoint = ""`, `feedbackURI = ""`, `feedbackHash = bytes32(0)`. Feedback ini **permanen** di registry, jadi crackie palsu saat uji coba ikut tercatat untuk `agentId` itu. Pakai `agentId` khusus uji coba.
 
 **Aturan di kontrak:**
 - Hanya dipanggil di jalur alarm, setelah semua state dan event ditulis, sebelum transfer hadiah.
@@ -337,7 +337,7 @@ Kesepakatan dengan BE (A–D): dua penghitung terpisah, `aturSidikJari` me-reset
 ## 8. Urutan kerja hari H
 | Jam | Target selesai |
 |---|---|
-| 12.00–13.00 | `forge init` di repo baru, kerangka `CrackieVault`: state, constructor, `bayar` (normal + alarm), `catatPercobaan`, `status()` |
+| 12.00–13.00 | Kerangka `CrackieVault` di `contracts/` (jalankan `forge install foundry-rs/forge-std` dulu karena `lib/` tidak di-commit): state, constructor, `bayar` (normal + alarm), `catatPercobaan`, `status()` |
 | 13.00–13.30 | Test jalur normal, alarm, setelah crackie. Deploy pertama ke Monad testnet |
 | 13.30–15.00 | Bagikan alamat + ABI + blok deploy di `web/src/abi/CrackieVault.ts`. Fungsi pemilik lengkap, `nyalakanLagi`, kunci celengan |
 | 15.00–16.30 | Rating + akumulator, batas per wallet. Bantu integrasi end-to-end; ukur gas, umumkan ke BE |

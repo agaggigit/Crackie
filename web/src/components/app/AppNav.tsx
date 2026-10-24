@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "./ConnectWallet";
+import { CrackieLogo } from "./CrackieLogo";
 import { FaucetButton } from "./FaucetModal";
 
 const TABS = [
@@ -12,9 +13,8 @@ const TABS = [
 
 export function Logo() {
   return (
-    <span className="flex items-center gap-2.5">
-      <span aria-hidden className="size-7 rounded-[10px] bg-gradient-to-b from-peach to-orange" />
-      <span className="font-head text-xl font-bold tracking-[-0.03em]">Crackie</span>
+    <span className="flex items-center">
+      <CrackieLogo className="h-7 w-auto" />
     </span>
   );
 }

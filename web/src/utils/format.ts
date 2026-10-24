@@ -61,3 +61,10 @@ export const txUrl = (hash: Hash | string) => `${EXPLORER_URL}/tx/${hash}`;
 export const addressUrl = (address: Address | string) => `${EXPLORER_URL}/address/${address}`;
 
 export const supplierName = (address: string) => SUPPLIERS.find((s) => s.address.toLowerCase() === address.toLowerCase())?.name;
+
+// Lama agent bertahan. bertahanSejak 0 berarti belum diisi kontrak, jadi tidak ditampilkan.
+export function formatHeld(aktif: boolean | undefined, bertahanSejak: bigint | undefined, now: number): string {
+  if (!aktif) return "0s";
+  if (!bertahanSejak || now === 0) return "–";
+  return formatDuration(now - Number(bertahanSejak));
+}

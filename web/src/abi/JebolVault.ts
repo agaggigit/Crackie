@@ -1,8 +1,7 @@
-// PLACEHOLDER: kontrak BELUM di-deploy. Alamat nol dan blok 0 akan ditimpa
-// contracts/script/ekspor-abi.mjs setelah deploy ke Monad testnet (10143).
-// ABI sudah asli (hasil forge build dari contracts/src/JebolVault.sol), aman dipakai untuk tipe.
-export const JEBOL_VAULT_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
-export const JEBOL_VAULT_DEPLOY_BLOCK = 0n;
+// Dibuat otomatis oleh contracts/script/ekspor-abi.mjs. Jangan diedit manual.
+// JebolVault di Monad testnet (10143). Tx deploy: 0xe031b51b2528efdcf78f181ebb5ca84851e135db4aa981f9b26d4db12f8066c7
+export const JEBOL_VAULT_ADDRESS = "0xee724702c2742c87138df571664bce57d474b566" as const;
+export const JEBOL_VAULT_DEPLOY_BLOCK = 73728792n;
 export const jebolVaultAbi = [
   {
     "type": "constructor",

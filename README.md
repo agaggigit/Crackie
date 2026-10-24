@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| 🎬 **Demo video** | **[DEMO VIDEO LINK — coming soon]** |
+| 🎬 **Demo video** | [**[DEMO VIDEO LINK]**](https://drive.google.com/drive/folders/1KXJxwF4V5y6zm3ZDkWIWP6aHAl_hEhXZ) |
 | 🌐 **App** | **https://app.crackie.xyz** |
 | 🐦 **X** | [@crackiexyz](https://x.com/crackiexyz) |
 | 📜 **Contract** (verified) | [`0x3b77520211940F47fAC14202f30a30C7705E0478`](https://testnet.monadscan.com/address/0x3b77520211940F47fAC14202f30a30C7705E0478) on Monad testnet |

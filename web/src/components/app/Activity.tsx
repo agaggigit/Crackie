@@ -4,13 +4,10 @@ import { Ban, Coffee, MessageSquare, RotateCcw, ShieldAlert, SlidersHorizontal }
 import { useMemo } from "react";
 import { useStartTime } from "@/hooks/useStartTime";
 import { DemoBadge } from "@/components/ui/Chip";
-import { SUPPLIERS } from "@/config/vault";
 import { useNow } from "@/hooks/useNow";
 import { useVaultEvents, type VaultEventItem } from "@/hooks/useVaultEvents";
 import { demoEvents } from "@/utils/demo";
-import { formatAgo, formatMon, shortAddress, txUrl } from "@/utils/format";
-
-const supplierName = (a: string) => SUPPLIERS.find((s) => s.address.toLowerCase() === a.toLowerCase())?.name;
+import { formatAgo, formatMon, shortAddress, supplierName, txUrl } from "@/utils/format";
 
 function describe(e: VaultEventItem) {
   switch (e.kind) {
@@ -18,10 +15,10 @@ function describe(e: VaultEventItem) {
       return { icon: MessageSquare, tone: "bg-navy text-white", title: `Try ${e.ke}`, sub: `by ${shortAddress(e.penyerang)}`, value: "" };
     case "paid": {
       const name = supplierName(e.ke);
-      return { icon: Coffee, tone: "bg-cream text-orange", title: `Paid ${name ?? shortAddress(e.ke)}`, sub: name ? "Approved supplier" : "Approved address", value: formatMon(e.jumlah) };
+      return { icon: Coffee, tone: "bg-cream text-orange", title: `Paid ${name ?? shortAddress(e.ke)}`, sub: name ? "Approved supplier" : "Approved address", value: `${formatMon(e.jumlah)} MON` };
     }
     case "broke":
-      return { icon: ShieldAlert, tone: "bg-orange text-white", title: "KopiBot broke", sub: `Bounty to ${shortAddress(e.penemu)}`, value: formatMon(e.hadiah) };
+      return { icon: ShieldAlert, tone: "bg-orange text-white", title: "KopiBot broke", sub: `Bounty to ${shortAddress(e.penemu)}`, value: `${formatMon(e.hadiah)} MON` };
     case "stopped":
       return { icon: Ban, tone: "bg-warn-bg text-warn", title: "Stopped paying", sub: "Until the owner restarts it", value: "" };
     case "restarted":

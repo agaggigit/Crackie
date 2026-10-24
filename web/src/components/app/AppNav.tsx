@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "./ConnectWallet";
+import { FaucetButton } from "./FaucetModal";
 
 const TABS = [
   { href: "/app", label: "Agents", match: (p: string) => p === "/app" || p.startsWith("/app/agent") },
@@ -42,7 +43,10 @@ export function AppNav() {
           );
         })}
       </nav>
-      <ConnectWallet />
+      <div className="flex items-center gap-2">
+        <FaucetButton />
+        <ConnectWallet />
+      </div>
     </header>
   );
 }

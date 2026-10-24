@@ -1,14 +1,17 @@
 import { formatEther, type Address, type Hash } from "viem";
 import { EXPLORER_URL } from "@/config/chains";
+import { SUPPLIERS } from "@/config/vault";
 
 // Saldo dalam MON, dipecah jadi bagian bulat dan desimal supaya desimalnya bisa dipudarkan.
-export function splitMon(wei: bigint, decimals = 2): { int: string; dec: string } {
+// Maksimal 4 desimal (docs/prd/fe.md Bagian 3.4), nol di belakang dibuang sampai minimal 2.
+export function splitMon(wei: bigint, decimals = 4): { int: string; dec: string } {
   const [int, frac = ""] = formatEther(wei).split(".");
-  const dec = (frac + "0".repeat(decimals)).slice(0, decimals);
+  let dec = (frac + "0".repeat(decimals)).slice(0, decimals);
+  while (dec.length > 2 && dec.endsWith("0")) dec = dec.slice(0, -1);
   return { int, dec: decimals > 0 ? `.${dec}` : "" };
 }
 
-export function formatMon(wei: bigint, decimals = 2): string {
+export function formatMon(wei: bigint, decimals = 4): string {
   const { int, dec } = splitMon(wei, decimals);
   return `${int}${dec}`;
 }
@@ -56,3 +59,5 @@ export function formatDate(timestampSec: number): string {
 
 export const txUrl = (hash: Hash | string) => `${EXPLORER_URL}/tx/${hash}`;
 export const addressUrl = (address: Address | string) => `${EXPLORER_URL}/address/${address}`;
+
+export const supplierName = (address: string) => SUPPLIERS.find((s) => s.address.toLowerCase() === address.toLowerCase())?.name;

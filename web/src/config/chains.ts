@@ -6,9 +6,12 @@ export const EXPLORER_URL =
 export const RPC_URL =
   process.env.NEXT_PUBLIC_RPC_URL || "https://testnet-rpc.monad.xyz";
 
+const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 10143);
+
+// 31337 hanya untuk uji lokal di anvil (lihat web/scripts/dev-anvil.mjs).
 export const monadTestnet = defineChain({
-  id: 10143,
-  name: "Monad Testnet",
+  id: CHAIN_ID,
+  name: CHAIN_ID === 31337 ? "Anvil" : "Monad Testnet",
   nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
   rpcUrls: {
     default: { http: [RPC_URL] },
@@ -18,3 +21,5 @@ export const monadTestnet = defineChain({
   },
   testnet: true,
 });
+
+export const OFFICIAL_FAUCET_URL = "https://faucet.monad.xyz";

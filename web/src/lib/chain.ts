@@ -47,6 +47,9 @@ const buatKlienPublik = () => createPublicClient({ chain: chain(), transport: tr
 let _publik: ReturnType<typeof buatKlienPublik> | undefined;
 export const klienPublik = () => (_publik ??= buatKlienPublik());
 
+export const klienDompet = (akun: ReturnType<typeof privateKeyToAccount>) =>
+  createWalletClient({ account: akun, chain: chain(), transport: transport() });
+
 // CRACKIE_VAULT_ALAMAT hanya untuk kontrak tiruan di anvil, diabaikan di Vercel.
 export function alamatVault(): Address {
   const a = (lokal() && process.env.CRACKIE_VAULT_ALAMAT) || CRACKIE_VAULT_ADDRESS;

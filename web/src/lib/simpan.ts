@@ -19,19 +19,20 @@ export function redis(): Redis {
 const KUNCI_AGENT = "kunci:agent";
 const LEPAS_KALAU_MILIK_SENDIRI = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
 
-export async function ambilKunci(): Promise<string | null> {
+// `nama` dipakai juga oleh faucet (kunci:faucet), karena wallet faucet punya nonce sendiri.
+export async function ambilKunci(nama = KUNCI_AGENT): Promise<string | null> {
   const token = crypto.randomUUID();
-  const ok = await redis().set(KUNCI_AGENT, token, { nx: true, ex: 90 });
+  const ok = await redis().set(nama, token, { nx: true, ex: 90 });
   return ok ? token : null;
 }
 
-export async function lepasKunci(token: string): Promise<void> {
-  await redis().eval(LEPAS_KALAU_MILIK_SENDIRI, [KUNCI_AGENT], [token]);
+export async function lepasKunci(token: string, nama = KUNCI_AGENT): Promise<void> {
+  await redis().eval(LEPAS_KALAU_MILIK_SENDIRI, [nama], [token]);
 }
 
 // --- Anggaran harian (token LLM), reset 00.00 WIB ---
 const WIB = 7 * 3600_000;
-const tanggalWib = () => new Date(Date.now() + WIB).toISOString().slice(0, 10);
+export const tanggalWib = () => new Date(Date.now() + WIB).toISOString().slice(0, 10);
 const kunciAnggaran = () => `anggaran:${tanggalWib()}`;
 
 function resetPada(): string {

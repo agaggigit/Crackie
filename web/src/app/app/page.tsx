@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { KopiBotCard, YourAgentCard } from "@/components/app/AgentCard";
 
-export const metadata: Metadata = { title: "Agents | Jebol" };
+export const metadata: Metadata = { title: "Agents | Crackie" };
 
 export default function AgentsPage() {
   return (

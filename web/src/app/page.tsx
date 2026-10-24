@@ -8,7 +8,7 @@ import { Jebi, type JebiMood } from "@/components/ui/Jebi";
 import { Melt, type MeltVariant } from "@/components/ui/Melt";
 
 export const metadata: Metadata = {
-  title: "Jebol | A bounty alarm for AI agents that hold money",
+  title: "Crackie | A bounty alarm for AI agents that hold money",
 };
 
 const STEPS: { n: string; title: string; body: string; mood: JebiMood; tone: "navy" | "cream" | "orange"; melt: MeltVariant | null }[] = [
@@ -139,7 +139,7 @@ export default function Landing() {
           <div className="flex max-w-[560px] flex-col gap-4">
             <h2 className="font-head text-[40px] font-semibold tracking-[-0.04em] sm:text-[52px]">For agent builders</h2>
             <p className="text-lg leading-relaxed text-white/70">
-              Add Jebol to your agent&apos;s wallet. You choose who it may pay and how much. Your main funds stay yours.
+              Add Crackie to your agent&apos;s wallet. You choose who it may pay and how much. Your main funds stay yours.
             </p>
             <span className="mt-2 inline-flex h-12 w-fit items-center rounded-full bg-white/10 px-6 text-[15px] font-semibold text-white/80">
               Self-serve setup is coming soon
